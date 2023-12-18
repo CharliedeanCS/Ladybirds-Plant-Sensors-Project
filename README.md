@@ -9,10 +9,10 @@ To do this, the team will:
 
 ## Repository Contents
 - pipeline
-  - extract
-  - test_extract
-  - transform
-  - test_transform
+  - extract.py
+  - test_extract.py
+  - transform.py
+  - test_transform.py
 - schema.sql
 
 ## Setup
