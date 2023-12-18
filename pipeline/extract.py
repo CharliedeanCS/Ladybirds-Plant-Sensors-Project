@@ -68,7 +68,6 @@ def fetch_all_plant_data() -> list[dict]:
                 all_plant_data.append(new_plant)
 
             current_plant += 1
-            print(current_plant)
     except requests.exceptions.JSONDecodeError:
         while_plants = False
 
