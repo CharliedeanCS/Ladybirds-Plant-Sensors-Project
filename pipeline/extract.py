@@ -1,5 +1,4 @@
 """Extract script that pulls all plant data from the API."""
-import csv
 import os
 
 import requests
@@ -14,8 +13,12 @@ def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
 
     plant_dataframe = pd.DataFrame(plant_list)
 
-    os.makedirs('./data/', exist_ok=True)
-    plant_dataframe.to_csv('./data/plant_data.csv', mode='a')
+    if not os.path.isfile('./data/plant_data.csv'):
+        os.makedirs('./data/', exist_ok=True)
+        plant_dataframe.to_csv('./data/plant_data.csv', header='column_names')
+    else:  # else it exists so append without writing the header
+        plant_dataframe.to_csv(
+            './data/plant_data.csv', mode='a', header=False)
 
     return plant_dataframe
 
@@ -33,7 +36,8 @@ def flatten_and_organize_data(plant_dict: dict) -> dict:
     botanist_phone = plant_dict["botanist"]["phone"]
 
     country_initials = plant_dict["origin_location"][3]
-    continent_and_city = plant_dict["origin_location"][4]
+    continent = plant_dict["origin_location"][4].split("/")[0]
+    region = plant_dict["origin_location"][2]
 
     new_plant_dict = {
         "Id": plant_id, "Name": plant_dict["name"], "Last Watered": plant_dict["last_watered"],
@@ -41,8 +45,8 @@ def flatten_and_organize_data(plant_dict: dict) -> dict:
         "Soil Moisture": plant_dict["soil_moisture"],
         "Temperature": plant_dict["temperature"], "Botanist Name": botanist_name,
         "Botanist Email": botanist_email,
-        "Botanist Phone": botanist_phone, "Country's Initials": country_initials,
-        "Continent/City": continent_and_city}
+        "Botanist Phone": botanist_phone, "Region": region, "Country's Initials": country_initials,
+        "Continent": continent}
 
     return new_plant_dict
 
