@@ -7,6 +7,15 @@ import requests.exceptions
 API_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 
 
+def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
+    """Converts the list of all plant data into one csv file"""
+
+    with open('plant_data.csv', 'w', newline='', encoding="utf-8") as output_file:
+        dict_writer = csv.DictWriter(output_file, plant_data[0].keys())
+        dict_writer.writeheader()
+        dict_writer.writerows(plant_list)
+
+
 def flatten_and_organize_data(plant_dict: list[dict]) -> list[dict]:
     """Flattens the data and selects only the parts of the data we need"""
 
@@ -18,8 +27,8 @@ def flatten_and_organize_data(plant_dict: list[dict]) -> list[dict]:
     botanist_name = plant_dict["botanist"]["name"]
     botanist_phone = plant_dict["botanist"]["phone"]
 
-    country_initials = plant_data["origin_location"][3]
-    continent_and_city = plant_data["origin_location"][4]
+    country_initials = plant_dict["origin_location"][3]
+    continent_and_city = plant_dict["origin_location"][4]
 
     new_plant_dict = {
         "Id": plant_id, "Name": plant_dict["name"], "Last Watered": plant_dict["last_watered"],
@@ -60,4 +69,4 @@ def fetch_all_plant_data() -> list[dict]:
 if __name__ == "__main__":
     plant_data = fetch_all_plant_data()
 
-    print(plant_data)
+    convert_plant_data_to_csv(plant_data)
