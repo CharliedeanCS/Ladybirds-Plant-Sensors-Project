@@ -13,12 +13,9 @@ def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
 
     plant_dataframe = pd.DataFrame(plant_list)
 
-    if not os.path.isfile('./data/plant_data.csv'):
-        os.makedirs('./data/', exist_ok=True)
-        plant_dataframe.to_csv('./data/plant_data.csv', header='column_names')
-    else:  # else it exists so append without writing the header
-        plant_dataframe.to_csv(
-            './data/plant_data.csv', mode='a', header=False)
+    os.makedirs('./data/', exist_ok=True)
+    plant_dataframe.to_csv('./data/plant_data.csv',
+                           header='column_names', index=False)
 
     return plant_dataframe
 
