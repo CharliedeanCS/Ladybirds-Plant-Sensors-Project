@@ -1,8 +1,10 @@
 """Extract script that pulls all plant data from the API."""
 import csv
+import os
 
 import requests
 import requests.exceptions
+import pandas as pd
 
 API_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 
@@ -10,10 +12,10 @@ API_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
     """Converts the list of all plant data into one csv file"""
 
-    with open('plant_data.csv', 'w', newline='', encoding="utf-8") as output_file:
-        dict_writer = csv.DictWriter(output_file, plant_list[0].keys())
-        dict_writer.writeheader()
-        dict_writer.writerows(plant_list)
+    df = pd.DataFrame(plant_list)
+
+    os.makedirs('./data/', exist_ok=True)
+    df.to_csv('./data/plant_data.csv', mode='a')
 
 
 def flatten_and_organize_data(plant_dict: dict) -> dict:
@@ -64,6 +66,7 @@ def fetch_all_plant_data() -> list[dict]:
                 all_plant_data.append(new_plant)
 
             current_plant += 1
+            print(current_plant)
     except requests.exceptions.JSONDecodeError:
         while_plants = False
 
@@ -71,6 +74,7 @@ def fetch_all_plant_data() -> list[dict]:
 
 
 if __name__ == "__main__":
+
     plant_data = fetch_all_plant_data()
 
     convert_plant_data_to_csv(plant_data)
