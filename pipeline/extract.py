@@ -12,10 +12,12 @@ API_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
     """Converts the list of all plant data into one csv file."""
 
-    df = pd.DataFrame(plant_list)
+    plant_dataframe = pd.DataFrame(plant_list)
 
     os.makedirs('./data/', exist_ok=True)
-    df.to_csv('./data/plant_data.csv', mode='a')
+    plant_dataframe.to_csv('./data/plant_data.csv', mode='a')
+
+    return plant_dataframe
 
 
 def flatten_and_organize_data(plant_dict: dict) -> dict:
