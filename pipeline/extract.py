@@ -17,7 +17,7 @@ def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
 
 
 def flatten_and_organize_data(plant_dict: dict) -> dict:
-    """Flattens the data and selects only the parts of the data we need"""
+    """Flattens the data and selects only the parts of the data we need."""
 
     if plant_dict == {}:
         raise ValueError("Plant data was empty")
