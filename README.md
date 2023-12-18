@@ -15,4 +15,12 @@ To do this, the team will:
   - test_transform
 - schema.sql
 
+## Setup
 
+## Running the script
+
+## Credits
+- Charlie Dean
+- Harvind Grewal
+- Zander Snow
+- Shivani Patel
