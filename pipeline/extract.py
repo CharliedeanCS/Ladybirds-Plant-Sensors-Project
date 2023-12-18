@@ -1,5 +1,8 @@
 """Extract script that pulls all plant data from the API."""
 import os
+import concurrent.futures
+import time
+
 
 import requests
 import requests.exceptions
@@ -48,35 +51,49 @@ def flatten_and_organize_data(plant_dict: dict) -> dict:
     return new_plant_dict
 
 
+def fetch_plant_data(current_plant):
+    """
+    Fetches data for a single plant.
+    """
+    try:
+        response = requests.get(f"{API_URL}{current_plant}", timeout=10)
+        plant_json = response.json()
+        plant_keys = plant_json.keys()
+
+        if 'error' not in plant_keys:
+            return flatten_and_organize_data(plant_json)
+    except requests.exceptions.JSONDecodeError:
+        pass
+
+    return None
+
+
 def fetch_all_plant_data() -> list[dict]:
     """
     Fetches all 50 plants data from the API,
-    reads the data into a dict.
+    reads the data into a dict using multiprocessing.
     """
 
-    while_plants = True
-    current_plant = 0
-    all_plant_data = []
+    max_plants = 55
 
-    try:
-        while while_plants:
-            response = requests.get(f"{API_URL}{current_plant}", timeout=10)
-            plant_json = response.json()
-            plant_keys = plant_json.keys()
+    with concurrent.futures.ThreadPoolExecutor() as multiprocessor:
+        plant_data = list(multiprocessor.map(
+            fetch_plant_data, range(max_plants)))
 
-            if 'error' not in plant_keys:
-                new_plant = flatten_and_organize_data(plant_json)
-                all_plant_data.append(new_plant)
-
-            current_plant += 1
-    except requests.exceptions.JSONDecodeError:
-        while_plants = False
-
-    return all_plant_data
+    return [plant for plant in plant_data if plant is not None]
 
 
 if __name__ == "__main__":
 
-    plant_data = fetch_all_plant_data()
+    st = time.time()
 
-    convert_plant_data_to_csv(plant_data)
+    plant_api_data = fetch_all_plant_data()
+
+    convert_plant_data_to_csv(plant_api_data)
+
+    # get the end time
+    et = time.time()
+
+    # get the execution time
+    elapsed_time = et - st
+    print('Execution time:', elapsed_time, 'seconds')
