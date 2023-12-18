@@ -28,7 +28,7 @@ def test_flatten_and_organize_data():
 
 
 def test_flatten_and_organize_data_empty():
-    """Tests that an error raises if the data is empty"""
+    """Tests that an error raises if the data is empty."""
 
     with pytest.raises(ValueError):
         flatten_and_organize_data({})
