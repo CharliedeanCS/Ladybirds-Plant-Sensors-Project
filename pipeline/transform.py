@@ -41,11 +41,14 @@ def check_soil_moisture_valid(df: pd.DataFrame) -> pd.DataFrame:
     return df[moisture_conditions]
 
 
-def check_valid_datetimes(df: pd.DataFrame) -> pd.DataFrame:
+def normalize_datetimes(df: pd.DataFrame) -> pd.DataFrame:
     """
     Check if datetimes are valid. Drop non-valid values
     """
-    pass
+    df['Last Watered'] = pd.to_datetime(df['Last Watered'])
+    df['Recording Taken'] = pd.to_datetime(df['Recording Taken'])
+
+    return df
 
 
 if __name__ == "__main__":
@@ -66,3 +69,7 @@ if __name__ == "__main__":
     # check moisture and temperature
     df = check_soil_moisture_valid(df)
     df = check_soil_temp_valid(df)
+    df = normalize_datetimes(df)
+
+    #  Add clean data to new file
+    df.to_csv(('cleaned_plant_data.csv'), index=False)
