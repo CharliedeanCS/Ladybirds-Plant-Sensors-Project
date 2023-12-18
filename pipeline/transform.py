@@ -1,3 +1,4 @@
+"""Transform script that produces cleaned data after extracting from APIs"""
 from os import path
 import pandas as pd
 import country_converter as coco

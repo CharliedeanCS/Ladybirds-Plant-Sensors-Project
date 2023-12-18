@@ -28,13 +28,31 @@ def test_remove_rows_with_null():
     df = pd.DataFrame(data)
     critical_columns = ['A', 'B']
 
-    assert remove_rows_with_null(df, critical_columns).to_dict() == {
-        'C': {0: 9, 1: 10, 2: 11, 3: 12}}
+    df = remove_rows_with_null(df, critical_columns)
+    assert df.to_dict() == {'A': {2: 1.0, 3: 4.0},
+                            'B': {2: 7.0, 3: 8.0},
+                            'C': {2: 11.0, 3: 12.0}}
 
-# data = {'A': [1, 2, None, 4],
-#         'C': [9, 10, 11, 12]}
 
-# df = pd.DataFrame(data)
+def test_check_soil_temp_valid():
+    data = {'Plant Name': ['PlantA', 'PlantB', 'PlantC', 'PlantD'],
+            'Temperature': [-4, 101, 15, 31]}
 
-# df = df.dropna(subset='A')
-# print(df)
+    df = pd.DataFrame(data)
+
+    df = check_soil_temp_valid(df)
+
+    assert df.to_dict() == {'Plant Name': {2: 'PlantC'},
+                            'Temperature': {2: 15.0}}
+
+
+def test_check_soil_moisture_valid():
+    data = {'Plant Name': ['PlantA', 'PlantB', 'PlantC'],
+            'Soil Moisture': [-4, 101, 15]}
+
+    df = pd.DataFrame(data)
+
+    df = check_soil_moisture_valid(df)
+
+    assert df.to_dict() == {'Plant Name': {2: 'PlantC'},
+                            'Soil Moisture': {2: 15.0}}
