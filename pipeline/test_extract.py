@@ -17,7 +17,7 @@ TEST_DATA = {'botanist': {'email': 'carl.linnaeus@lnhm.co.uk',
 def test_flatten_and_organize_data():
     """
     Tests that the flatten and organize dataset functions works as
-    intended and returns a new dict
+    intended and returns a new dict.
     """
 
     output_dict = flatten_and_organize_data(TEST_DATA)
