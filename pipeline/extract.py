@@ -8,7 +8,7 @@ API_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 
 
 def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
-    """Converts the list of all plant data into one csv file"""
+    """Converts the list of all plant data into one csv file."""
 
     with open('plant_data.csv', 'w', newline='', encoding="utf-8") as output_file:
         dict_writer = csv.DictWriter(output_file, plant_list[0].keys())
