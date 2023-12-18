@@ -1,8 +1,12 @@
 """Basic unit tests for the extracting from API functions"""
 
 import pytest
+from unittest.mock import patch
+import requests.exceptions
 
-from extract import flatten_and_organize_data
+import pandas as pd
+
+from extract import flatten_and_organize_data, convert_plant_data_to_csv, fetch_plant_data
 
 
 TEST_DATA = {'botanist': {'email': 'carl.linnaeus@lnhm.co.uk',
@@ -32,3 +36,21 @@ def test_flatten_and_organize_data_empty():
 
     with pytest.raises(ValueError):
         flatten_and_organize_data({})
+
+
+def test_convert_plant_data_returns_correct_format():
+    """Tests the convert plant data file returns a pandas data frame"""
+
+    df = convert_plant_data_to_csv([TEST_DATA])
+
+    assert isinstance(df, pd.DataFrame)
+
+
+def test_fetch_plant_data_fails_at_51(mock_get):
+    mock_get.return_value = {}
+
+    response = fetch_plant_data(1)
+
+    print(response)
+
+    assert 1 == 0
