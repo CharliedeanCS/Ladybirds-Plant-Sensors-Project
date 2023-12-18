@@ -10,7 +10,7 @@ API_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 
 
 def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
-    """Converts the list of all plant data into one csv file"""
+    """Converts the list of all plant data into one csv file."""
 
     df = pd.DataFrame(plant_list)
 
@@ -19,7 +19,7 @@ def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
 
 
 def flatten_and_organize_data(plant_dict: dict) -> dict:
-    """Flattens the data and selects only the parts of the data we need"""
+    """Flattens the data and selects only the parts of the data we need."""
 
     if plant_dict == {}:
         raise ValueError("Plant data was empty")
