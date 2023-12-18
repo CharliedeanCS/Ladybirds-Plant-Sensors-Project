@@ -5,7 +5,7 @@ import country_converter as coco
 
 def standardize_country_name(country_name: str) -> str:
     """
-    Convert country code given into standard country name
+    Convert country code given into standard country name.
     """
     return coco.convert(names=country_name, to='name_short')
 
