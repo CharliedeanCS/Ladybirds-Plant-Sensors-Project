@@ -16,10 +16,11 @@ def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
         dict_writer.writerows(plant_list)
 
 
-def flatten_and_organize_data(plant_dict: list[dict]) -> list[dict]:
+def flatten_and_organize_data(plant_dict: dict) -> dict:
     """Flattens the data and selects only the parts of the data we need"""
 
-    print(plant_dict)
+    if plant_dict == {}:
+        raise ValueError("Plant data was empty")
 
     plant_id = str(int(plant_dict["plant_id"] + 1))
 
@@ -46,7 +47,7 @@ def fetch_all_plant_data() -> list[dict]:
     """
 
     while_plants = True
-    current_plant = 47
+    current_plant = 0
     all_plant_data = []
 
     try:
