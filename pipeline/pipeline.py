@@ -11,7 +11,7 @@ import pandas as pd
 
 from extract import fetch_all_plant_data
 from transform import standardize_country_name, remove_rows_with_null, check_soil_moisture_valid, check_soil_temp_valid, normalize_datetimes, change_temp_and_moisture_to_two_dp
-from load import create_database_connection, insert_into_recordings_table
+from load import create_database_connection, insert_into_recordings_table, insert_into_location_table, insert_into_botanist_table, insert_into_plant_table
 
 if __name__ == "__main__":
 
@@ -49,6 +49,10 @@ if __name__ == "__main__":
         connection = create_database_connection(environ)
 
         # Inserts the current iterations data into the SQL Server
+        insert_into_location_table(connection, plants)
+        insert_into_botanist_table(connection, plants)
+        insert_into_plant_table(connection, plants)
+
         insert_into_recordings_table(connection, plants)
 
         # get the end time
