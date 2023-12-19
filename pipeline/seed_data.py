@@ -5,6 +5,12 @@ from os import environ
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, sql, Connection
 
+def get_connection()-> Connection:
+    """Returns a connection to the database."""
+    engine = create_engine(
+        f"mssql+pymssql://{environ['DB_USER']}:{environ['DB_PASSWORD']}@{environ['DB_HOST']}/?charset=utf8")
+    connection = engine.connect()
+    return connection
 
 def read_csv(file_path: str) -> list[dict]:
     """Extracts the relevant information about botanists from the plant data,
@@ -29,22 +35,23 @@ def extract_botanist_data(csv_data: list[dict]) -> list[dict]:
 
 
 def extract_location_data(csv_data: list[dict]) -> list[dict]:
-    """Takes the .csv data and returns the location information for each plant as a list of unique dicts."""
+    """Takes the cleaned .csv data, returns the location 
+    information for each plant as a list of unique dicts."""
     locations = []
     for plant in csv_data:
         continent = plant['Continent']
         country = plant['Country']
         region = plant['Region']
         locations.append({"region": region, "country": country, "continent": continent})
-    
+
     location_sets = set([tuple(location.items()) for location in locations])
     unique_locations = [dict(i) for i in location_sets]
     return unique_locations
 
 
-def extract_plant_data(csv_data: list[dict], botanist_data: list[dict], location_data: list[dict]) -> list[dict]:
-    """Extracts relevant plant data from .csv and combines with the botanist and location data to give an apporpriate
-    list of unique dicts to seed the plant table."""
+def extract_plant_data(csv_data: list[dict],botanist_data: list[dict], location_data: list[dict]) -> list[dict]:
+    """Extracts relevant plant data from the cleaned .csv file, combines with the 
+    botanist and location data, returns a list of unique dicts to seed the plant table."""
     plants = []
     for plant in csv_data:
         name = plant['Name']
@@ -111,14 +118,12 @@ if __name__ == "__main__":
     plants = extract_plant_data(data, botanists, locations)
 
     #connecting to database
-    engine = create_engine(
-        f"mssql+pymssql://{environ['DB_USER']}:{environ['DB_PASSWORD']}@{environ['DB_HOST']}/?charset=utf8")
-    conn = engine.connect()
-    conn.execute(sql.text("USE plants;"))
+    db_conn = get_connection()
+    db_conn.execute(sql.text("USE plants;"))
 
     #seeding each table with relevant data
-    seed_botanist_table(conn, botanists)
-    seed_plant_table(conn, plants)
-    seed_location_table(conn,locations)
+    seed_botanist_table(db_conn, botanists)
+    seed_plant_table(db_conn, plants)
+    seed_location_table(db_conn,locations)
 
-    conn.close()
+    db_conn.close()
