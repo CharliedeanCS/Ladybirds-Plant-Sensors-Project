@@ -5,7 +5,7 @@ from os import environ, _Environ
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, sql, Connection
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, ProgrammingError
 import pandas as pd
 
 from transform import csv_to_data_frame
@@ -29,20 +29,21 @@ def insert_into_location_table(connection: Connection, plant_data: pd.DataFrame)
 
     for plant in plant_list:
 
-        try:
+        query = sql.text(
+            "SELECT location_id FROM s_delta.location WHERE region = (:region)")
+        args = ({"region": plant[9]})
+        id = connection.execute(query, args).fetchone()
+
+        if id is None:
             region = plant[9]
             continent = plant[10]
             country = plant[11]
-
-            connection.execute(sql.text("USE plants;"))
 
             query = sql.text(
                 """INSERT INTO s_delta.location (region,country,continent)
                 VALUES (:region,:continent,:country)""")
             connection.execute(
                 query, {"region": region, "continent": continent, "country": country})
-        except IntegrityError:
-            pass
 
 
 def insert_into_botanist_table(connection: Connection, plant_data: pd.DataFrame) -> None:
@@ -52,20 +53,24 @@ def insert_into_botanist_table(connection: Connection, plant_data: pd.DataFrame)
 
     for plant in plant_list:
 
-        try:
+        connection.execute(sql.text("USE plants;"))
+
+        query = sql.text(
+            "SELECT botanist_id FROM s_delta.botanist WHERE telephone_number = (:telephone)")
+        args = ({"telephone": plant[8]})
+        id = connection.execute(query, args).fetchone()
+
+        if id is None:
+
             name = plant[6]
             email = plant[7]
             telephone = plant[8]
-
-            connection.execute(sql.text("USE plants;"))
 
             query = sql.text(
                 """INSERT INTO s_delta.botanist (name,email,telephone_number)
                 VALUES (:name,:email,:telephone)""")
             connection.execute(
                 query, {"name": name, "email": email, "telephone": telephone})
-        except IntegrityError:
-            pass
 
 
 def insert_into_plant_table(conn: Connection, plant_data: list[dict]) -> None:
@@ -133,8 +138,8 @@ if __name__ == "__main__":
 
     connection = create_database_connection(environ)
 
-    insert_into_location_table(connection, plant_dataframe)
     insert_into_botanist_table(connection, plant_dataframe)
+    insert_into_location_table(connection, plant_dataframe)
     insert_into_plant_table(connection, plant_dataframe)
 
     insert_into_recordings_table(connection, plant_dataframe)
