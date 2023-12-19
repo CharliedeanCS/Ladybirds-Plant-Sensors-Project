@@ -2,7 +2,7 @@
 
 import pytest
 
-from extract import flatten_and_organize_data
+from extract import flatten_and_organize_data, fetch_plant_data
 
 
 TEST_DATA = {'botanist': {'email': 'carl.linnaeus@lnhm.co.uk',
@@ -32,3 +32,11 @@ def test_flatten_and_organize_data_empty():
 
     with pytest.raises(ValueError):
         flatten_and_organize_data({})
+
+
+def test_fetch_plant_data_fails_at_51():
+    """Tests that fetching the incorrect plant number returns an error"""
+
+    incorrect_outcome = fetch_plant_data(51)
+
+    assert incorrect_outcome is None
