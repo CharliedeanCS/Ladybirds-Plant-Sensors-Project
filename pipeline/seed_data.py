@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine, sql, Connection
 
 
-
 def read_csv(file_path: str) -> list[dict]:
     """Extracts the relevant information about botanists from the plant data,
     Appends to a list to seed the 'botanist' table."""
