@@ -37,7 +37,7 @@ def flatten_and_organize_data(plant_dict: dict) -> dict:
     continent = plant_dict["origin_location"][4].split("/")[0]
     region = plant_dict["origin_location"][2]
 
-    plant_id = plant_dict["plant_id"]
+    plant_id = str(int(plant_dict["plant_id"] + 1))
 
     new_plant_dict = {"Id": plant_id, "Name": plant_dict["name"], "Last Watered": plant_dict["last_watered"],
                       "Recording Taken": plant_dict["recording_taken"],
