@@ -29,8 +29,6 @@ def flatten_and_organize_data(plant_dict: dict) -> dict:
     if plant_dict == {}:
         raise ValueError("Plant data was empty")
 
-    plant_id = str(int(plant_dict["plant_id"] + 1))
-
     botanist_email = plant_dict["botanist"]["email"]
     botanist_name = plant_dict["botanist"]["name"]
     botanist_phone = plant_dict["botanist"]["phone"]
@@ -39,14 +37,15 @@ def flatten_and_organize_data(plant_dict: dict) -> dict:
     continent = plant_dict["origin_location"][4].split("/")[0]
     region = plant_dict["origin_location"][2]
 
-    new_plant_dict = {
-        "Id": plant_id, "Name": plant_dict["name"], "Last Watered": plant_dict["last_watered"],
-        "Recording Taken": plant_dict["recording_taken"],
-        "Soil Moisture": plant_dict["soil_moisture"],
-        "Temperature": plant_dict["temperature"], "Botanist Name": botanist_name,
-        "Botanist Email": botanist_email,
-        "Botanist Phone": botanist_phone, "Region": region, "Country's Initials": country_initials,
-        "Continent": continent}
+    plant_id = plant_dict["plant_id"]
+
+    new_plant_dict = {"Id": plant_id, "Name": plant_dict["name"], "Last Watered": plant_dict["last_watered"],
+                      "Recording Taken": plant_dict["recording_taken"],
+                      "Soil Moisture": plant_dict["soil_moisture"],
+                      "Temperature": plant_dict["temperature"], "Botanist Name": botanist_name,
+                      "Botanist Email": botanist_email,
+                      "Botanist Phone": botanist_phone, "Region": region, "Country's Initials": country_initials,
+                      "Continent": continent}
 
     return new_plant_dict
 
