@@ -4,10 +4,11 @@
 from os import environ
 
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, sql
+from sqlalchemy import create_engine, sql, Connection
+import pandas as pd
 
 
-def create_database_connection():
+def create_database_connection() -> Connection:
     """Creates a database connection to the SQL Server"""
 
     engine = create_engine(
@@ -18,19 +19,20 @@ def create_database_connection():
     return conn
 
 
+def insert_into_recordings_table(connection: Connection, plant_data: pd.DataFrame) -> None:
+    """Inserts data from a pandas data frame into a SQL Server"""
+
+    connection.execute(sql.text("USE plants;"))
+
+    query = sql.text("INSERT INTO s_delta.recording (word) VALUES (:msg)")
+    connection.execute(query, {"msg": "SQL INJECTION CODE"})
+    connection.execute(sql.text("COMMIT;"))
+
+
 if __name__ == "__main__":
 
     load_dotenv()
 
+    plant_dataframe = pd.read_csv("plant_data.csv")
+
     connection = create_database_connection()
-
-    conn.execute(sql.text("USE plants;"))
-
-    query = sql.text("INSERT INTO general.example (word) VALUES (:msg)")
-    conn.execute(query, {"msg": "SQL INJECTION CODE"})
-
-    query = sql.text("SELECT * FROM s_delta.example;")
-
-    conn.execute(sql.text("COMMIT;"))
-    res = conn.execute(query).fetchall()
-    print(res)
