@@ -10,11 +10,11 @@ import pandas as pd
 from transform import csv_to_data_frame
 
 
-def create_database_connection() -> Connection:
+def create_database_connection(config) -> Connection:
     """Creates a database connection to the SQL Server"""
 
     engine = create_engine(
-        f"mssql+pymssql://{environ['DB_USERNAME']}:{environ['DB_PASSWORD']}@{environ['DB_HOST']}/?charset=utf8")
+        f"mssql+pymssql://{config['DB_USERNAME']}:{config['DB_PASSWORD']}@{config['DB_HOST']}/?charset=utf8")
 
     conn = engine.connect()
 
@@ -28,22 +28,19 @@ def insert_into_recordings_table(connection: Connection, plant_data: pd.DataFram
 
     for plant in plant_list:
 
-        try:
-            id = plant[0]
-            soil = plant[4]
-            temperature = plant[5]
-            recording = plant[3]
-            watered = plant[2]
+        id = plant[0]
+        soil = plant[4]
+        temperature = plant[5]
+        recording = plant[3]
+        watered = plant[2]
 
-            connection.execute(sql.text("USE plants;"))
+        connection.execute(sql.text("USE plants;"))
 
-            query = sql.text(
-                """INSERT INTO s_delta.recording (plant_id,soil_moisture,temperature,recording_taken,last_watered)
-                VALUES (:id,:soil,:temperature,:recording,:watered)""")
-            connection.execute(query, {"id": id, "soil": soil, "temperature": temperature, "recording": recording,
-                                       "watered": watered})
-        except:
-            pass
+        query = sql.text(
+            """INSERT INTO s_delta.recording (plant_id,soil_moisture,temperature,recording_taken,last_watered)
+            VALUES (:id,:soil,:temperature,:recording,:watered)""")
+        connection.execute(query, {"id": id, "soil": soil, "temperature": temperature, "recording": recording,
+                                   "watered": watered})
 
     connection.execute(sql.text("COMMIT;"))
 
@@ -54,6 +51,6 @@ if __name__ == "__main__":
 
     plant_dataframe = csv_to_data_frame('./data/cleaned_plant_data.csv')
 
-    connection = create_database_connection()
+    connection = create_database_connection(environ)
 
     insert_into_recordings_table(connection, plant_dataframe)
