@@ -47,7 +47,7 @@ def normalize_datetimes(dataframe: pd.DataFrame) -> pd.DataFrame:
     Check if datetimes are valid. Drop non-valid values
     """
     dataframe['Last Watered'] = pd.to_datetime(
-        dataframe['Last Watered'], errors='coerce')
+        dataframe['Last Watered'], errors='coerce').dt.tz_localize(None)
     dataframe['Recording Taken'] = pd.to_datetime(
         dataframe['Recording Taken'], errors='coerce')
 
