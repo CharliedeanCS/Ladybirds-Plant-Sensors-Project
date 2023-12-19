@@ -80,7 +80,12 @@ def insert_into_plant_table(conn: Connection, plant_data: list[dict]) -> None:
 
     for plant in plant_data:
 
-        try:
+        query = sql.text(
+            "SELECT plant_id FROM s_delta.plant WHERE name = (:name)")
+        args = ({"name": plant["Name"]})
+        id = connection.execute(query, args).fetchone()
+
+        if id is None:
 
             query = sql.text(
                 "SELECT botanist_id FROM s_delta.botanist WHERE telephone_number = (:num)")
@@ -97,9 +102,6 @@ def insert_into_plant_table(conn: Connection, plant_data: list[dict]) -> None:
             args = ({"id": plant["Id"], "name": plant["Name"], "b_id": botanist_id,
                     "l_id": location_id})
             conn.execute(query, args)
-
-        except IntegrityError:
-            pass
 
 
 def insert_into_recordings_table(connection: Connection, plant_data: pd.DataFrame) -> None:
