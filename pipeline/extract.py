@@ -39,12 +39,15 @@ def flatten_and_organize_data(plant_dict: dict) -> dict:
 
     plant_id = str(int(plant_dict["plant_id"] + 1))
 
-    new_plant_dict = {"Id": plant_id, "Name": plant_dict["name"], "Last Watered": plant_dict["last_watered"],
+    new_plant_dict = {"Id": plant_id, "Name": plant_dict["name"],
+                      "Last Watered": plant_dict["last_watered"],
                       "Recording Taken": plant_dict["recording_taken"],
                       "Soil Moisture": plant_dict["soil_moisture"],
-                      "Temperature": plant_dict["temperature"], "Botanist Name": botanist_name,
+                      "Temperature": plant_dict["temperature"],
+                      "Botanist Name": botanist_name,
                       "Botanist Email": botanist_email,
-                      "Botanist Phone": botanist_phone, "Region": region, "Country's Initials": country_initials,
+                      "Botanist Phone": botanist_phone,
+                      "Region": region, "Country's Initials": country_initials,
                       "Continent": continent}
 
     return new_plant_dict
