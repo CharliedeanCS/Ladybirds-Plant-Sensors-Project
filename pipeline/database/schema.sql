@@ -34,7 +34,7 @@ CREATE TABLE s_delta.botanist(
 GO
 
 CREATE TABLE s_delta.plant(
-    plant_id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
+    plant_id INT NOT NULL PRIMARY KEY,
     name VARCHAR(100),
     location_id INT,
     botanist_id INT,
