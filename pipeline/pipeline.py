@@ -62,4 +62,4 @@ if __name__ == "__main__":
         elapsed_time = et - st
         print('Execution time:', elapsed_time, 'seconds')
 
-        time.sleep(60)
+        time.sleep(30)
