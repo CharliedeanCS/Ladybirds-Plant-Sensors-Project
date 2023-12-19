@@ -1,7 +1,7 @@
 """Script to connect to an MSSQL database and insert plant data"""
 
 
-from os import environ
+from os import environ, _Environ
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, sql, Connection
@@ -10,7 +10,7 @@ import pandas as pd
 from transform import csv_to_data_frame
 
 
-def create_database_connection(config) -> Connection:
+def create_database_connection(config: _Environ) -> Connection:
     """Creates a database connection to the SQL Server"""
 
     engine = create_engine(
