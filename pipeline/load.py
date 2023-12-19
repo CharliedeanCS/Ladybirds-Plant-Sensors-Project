@@ -10,7 +10,7 @@ import pandas as pd
 from transform import csv_to_data_frame
 
 
-def create_database_connection(config) -> Connection:
+def create_database_connection(config: _Environ) -> Connection:
     """Creates a database connection to the SQL Server"""
 
     engine = create_engine(
