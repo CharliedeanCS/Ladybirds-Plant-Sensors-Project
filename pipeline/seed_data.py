@@ -103,8 +103,8 @@ def seed_plant_table(conn: Connection, plant_data: list[dict]) -> None:
         location_id = conn.execute(query, args).fetchone()[0]
 
         query = sql.text(
-            "INSERT INTO s_delta.plant (name, botanist_id, location_id) VALUES (:n, :b_id, :l_id)")
-        args = ({"n": plant["name"], "b_id": botanist_id,
+            "INSERT INTO s_delta.plant (plant_id, name, botanist_id, location_id) VALUES (:id, :n, :b_id, :l_id)")
+        args = ({"id": plant["plant_id"],"n": plant["name"], "b_id": botanist_id,
                 "l_id": location_id})
         conn.execute(query, args)
 
