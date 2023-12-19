@@ -1,5 +1,5 @@
 """Transform script that produces cleaned data after extracting from APIs"""
-from os import path
+
 import pandas as pd
 import country_converter as coco
 
@@ -11,45 +11,59 @@ def standardize_country_name(country_name: str) -> str:
     return coco.convert(names=country_name, to='name_short')
 
 
-def remove_rows_with_null(df, columns):
+def remove_rows_with_null(dataframe, columns):
     """
     Remove rows with null values in specified columns of a DataFrame.
     """
-    return df.dropna(subset=columns)
+    return dataframe.dropna(subset=columns)
 
 
-def check_soil_temp_valid(df: pd.DataFrame) -> pd.DataFrame:
+def check_soil_temp_valid(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     Check if temperature reading is valid.
     """
     temp_conditions = (
-        (df['Temperature'] > 0) &
-        (df['Temperature'] < 30)
+        (dataframe['Temperature'] > 0) &
+        (dataframe['Temperature'] < 30)
     )
 
-    return df[temp_conditions]
+    return dataframe[temp_conditions]
 
 
-def check_soil_moisture_valid(df: pd.DataFrame) -> pd.DataFrame:
+def check_soil_moisture_valid(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     Check if temperature reading is valid.
     """
     moisture_conditions = (
-        (df['Soil Moisture'] > 0) &
-        (df['Soil Moisture'] < 100)
+        (dataframe['Soil Moisture'] > 0) &
+        (dataframe['Soil Moisture'] < 100)
     )
 
-    return df[moisture_conditions]
+    return dataframe[moisture_conditions]
 
 
-def normalize_datetimes(df: pd.DataFrame) -> pd.DataFrame:
+def normalize_datetimes(dataframe: pd.DataFrame) -> pd.DataFrame:
     """
     Check if datetimes are valid. Drop non-valid values
     """
-    df['Last Watered'] = pd.to_datetime(df['Last Watered'])
-    df['Recording Taken'] = pd.to_datetime(df['Recording Taken'])
+    dataframe['Last Watered'] = pd.to_datetime(
+        dataframe['Last Watered'], errors='coerce')
+    dataframe['Recording Taken'] = pd.to_datetime(
+        dataframe['Recording Taken'], errors='coerce')
 
-    return df
+    dataframe = dataframe.dropna(subset=['Last Watered', 'Recording Taken'])
+
+    return dataframe
+
+
+def change_temp_and_moisture_to_two_dp(dataframe: pd.DataFrame) -> pd.DataFrame:
+    """
+    Round values of temperature and soil moisture to include only two decimal places
+    """
+    dataframe['Soil Moisture'] = dataframe['Soil Moisture'].round(2)
+    dataframe['Temperature'] = dataframe['Temperature'].round(2)
+
+    return dataframe
 
 
 if __name__ == "__main__":
@@ -63,14 +77,15 @@ if __name__ == "__main__":
     # Drop redundant columns
     df = df.drop("Country's Initials", axis=1)
 
-    # Drop null values in important columns
+    # Drop rows with null values in important columns
     df = remove_rows_with_null(df, ["Id", "Name", "Recording Taken", "Soil Moisture",
                                "Temperature", "Botanist Name", "Botanist Email", "Botanist Phone"])
 
-    # check moisture and temperature
+    # Validate and round moisture and temperature values
     df = check_soil_moisture_valid(df)
     df = check_soil_temp_valid(df)
     df = normalize_datetimes(df)
+    df = change_temp_and_moisture_to_two_dp(df)
 
-    #  Add clean data to new file
+    # Add clean data to new file
     df.to_csv(('cleaned_plant_data.csv'), index=False)
