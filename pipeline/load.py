@@ -1,7 +1,7 @@
 """Script to connect to an MSSQL database and insert plant data"""
 
 
-from os import environ
+from os import environ, _Environ
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, sql, Connection
