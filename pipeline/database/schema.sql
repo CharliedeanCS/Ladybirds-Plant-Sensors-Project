@@ -19,7 +19,7 @@ GO
 
 CREATE TABLE s_delta.location (
     location_id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
-    region VARCHAR,
+    region VARCHAR(100),
     country VARCHAR(50),
     continent VARCHAR(20)
 );
