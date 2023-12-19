@@ -11,25 +11,11 @@ import pandas as pd
 API_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 
 
-def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
-    """Converts the list of all plant data into one csv file."""
-
-    plant_dataframe = pd.DataFrame(plant_list)
-
-    os.makedirs('./data/', exist_ok=True)
-    plant_dataframe.to_csv('./data/plant_data.csv',
-                           header='column_names', index=False)
-
-    return plant_dataframe
-
-
 def flatten_and_organize_data(plant_dict: dict) -> dict:
     """Flattens the data and selects only the parts of the data we need."""
 
     if plant_dict == {}:
         raise ValueError("Plant data was empty")
-
-    plant_id = str(int(plant_dict["plant_id"] + 1))
 
     botanist_email = plant_dict["botanist"]["email"]
     botanist_name = plant_dict["botanist"]["name"]
@@ -39,14 +25,18 @@ def flatten_and_organize_data(plant_dict: dict) -> dict:
     continent = plant_dict["origin_location"][4].split("/")[0]
     region = plant_dict["origin_location"][2]
 
-    new_plant_dict = {
-        "Id": plant_id, "Name": plant_dict["name"], "Last Watered": plant_dict["last_watered"],
-        "Recording Taken": plant_dict["recording_taken"],
-        "Soil Moisture": plant_dict["soil_moisture"],
-        "Temperature": plant_dict["temperature"], "Botanist Name": botanist_name,
-        "Botanist Email": botanist_email,
-        "Botanist Phone": botanist_phone, "Region": region, "Country's Initials": country_initials,
-        "Continent": continent}
+    plant_id = str(int(plant_dict["plant_id"] + 1))
+
+    new_plant_dict = {"Id": plant_id, "Name": plant_dict["name"],
+                      "Last Watered": plant_dict["last_watered"],
+                      "Recording Taken": plant_dict["recording_taken"],
+                      "Soil Moisture": plant_dict["soil_moisture"],
+                      "Temperature": plant_dict["temperature"],
+                      "Botanist Name": botanist_name,
+                      "Botanist Email": botanist_email,
+                      "Botanist Phone": botanist_phone,
+                      "Region": region, "Country's Initials": country_initials,
+                      "Continent": continent}
 
     return new_plant_dict
 
@@ -89,7 +79,7 @@ if __name__ == "__main__":
 
     plant_api_data = fetch_all_plant_data()
 
-    convert_plant_data_to_csv(plant_api_data)
+    plants = pd.DataFrame(plant_api_data)
 
     # get the end time
     et = time.time()
