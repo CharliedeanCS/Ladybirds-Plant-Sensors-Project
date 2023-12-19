@@ -75,7 +75,7 @@ def csv_to_data_frame(filename: str) -> pd.DataFrame:
 def upload_clean_csv_file(filename: str, plant_data: pd.DataFrame) -> None:
     """Creates a new CSV file with the clean data"""
 
-    plant_data.to_csv((filename), index=False)
+    plant_data.to_csv(filename, index=False)
 
 
 if __name__ == "__main__":
