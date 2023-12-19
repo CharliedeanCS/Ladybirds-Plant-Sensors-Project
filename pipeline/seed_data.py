@@ -5,10 +5,13 @@ from os import environ
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, sql, Connection
 
+from transform import standardize_country_name
+
+
 def get_connection()-> Connection:
     """Returns a connection to the database."""
     engine = create_engine(
-        f"mssql+pymssql://{environ['DB_USER']}:{environ['DB_PASSWORD']}@{environ['DB_HOST']}/?charset=utf8")
+        f"mssql+pymssql://{environ['DB_USERNAME']}:{environ['DB_PASSWORD']}@{environ['DB_HOST']}/?charset=utf8")
     connection = engine.connect()
     return connection
 
@@ -40,7 +43,7 @@ def extract_location_data(csv_data: list[dict]) -> list[dict]:
     locations = []
     for plant in csv_data:
         continent = plant['Continent']
-        country = plant['Country']
+        country = standardize_country_name(plant["Country's Initials"])
         region = plant['Region']
         locations.append({"region": region, "country": country, "continent": continent})
 
@@ -54,16 +57,16 @@ def extract_plant_data(csv_data: list[dict],botanist_data: list[dict], location_
     botanist and location data, returns a list of unique dicts to seed the plant table."""
     plants = []
     for plant in csv_data:
+        plant_id = plant["Id"]
         name = plant['Name']
         for botanist in botanist_data:
             if plant['Botanist Name']== botanist['name']:
                 botanist_num = botanist['telephone_number']
         for location in location_data:
-            if plant['Region'] == location['region'] and plant['Country'] == location['country']:
+            if plant['Region'] == location['region']:
                 location_reg = location['region']
 
-        plants.append({"name": name, "botanist_num": botanist_num, "location_reg": location_reg})
-
+        plants.append({"plant_id": plant_id, "name": name, "botanist_num": botanist_num, "location_reg": location_reg})
     return plants
 
 
@@ -73,7 +76,7 @@ def seed_botanist_table(conn: Connection, botanist_data: list[dict]) -> None:
         query = sql.text("INSERT INTO s_delta.botanist (name, email, telephone_number) VALUES (:n, :e, :t)")
         args = ({"n":botanist["name"], "e":botanist["email"], "t":botanist["telephone_number"]})
         conn.execute(query,args)
-    conn.execute(sql.text("COMMIT;"))
+
 
 
 def seed_location_table(conn: Connection, location_data: list[dict]) -> None:
@@ -84,7 +87,7 @@ def seed_location_table(conn: Connection, location_data: list[dict]) -> None:
         args = ({"reg": location["region"], "cou": location["country"],
                 "con": location["continent"]})
         conn.execute(query, args)
-    conn.execute(sql.text("COMMIT;"))
+
 
 
 def seed_plant_table(conn: Connection, plant_data: list[dict]) -> None:
@@ -104,6 +107,7 @@ def seed_plant_table(conn: Connection, plant_data: list[dict]) -> None:
         args = ({"n": plant["name"], "b_id": botanist_id,
                 "l_id": location_id})
         conn.execute(query, args)
+
     conn.execute(sql.text("COMMIT;"))
 
 
@@ -111,7 +115,7 @@ if __name__ == "__main__":
     load_dotenv()
 
     #extracting data from .csv file
-    filepath = '../pipeline/cleaned_plant_data.csv'
+    filepath = 'data/plant_data.csv'
     data = read_csv(filepath)
     botanists = extract_botanist_data(data)
     locations = extract_location_data(data)
@@ -123,7 +127,7 @@ if __name__ == "__main__":
 
     #seeding each table with relevant data
     seed_botanist_table(db_conn, botanists)
-    seed_plant_table(db_conn, plants)
     seed_location_table(db_conn,locations)
+    seed_plant_table(db_conn, plants)
 
     db_conn.close()
