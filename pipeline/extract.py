@@ -11,18 +11,6 @@ import pandas as pd
 API_URL = "https://data-eng-plants-api.herokuapp.com/plants/"
 
 
-def convert_plant_data_to_csv(plant_list: list[dict]) -> None:
-    """Converts the list of all plant data into one csv file."""
-
-    plant_dataframe = pd.DataFrame(plant_list)
-
-    os.makedirs('./data/', exist_ok=True)
-    plant_dataframe.to_csv('./data/plant_data.csv',
-                           header='column_names', index=False)
-
-    return plant_dataframe
-
-
 def flatten_and_organize_data(plant_dict: dict) -> dict:
     """Flattens the data and selects only the parts of the data we need."""
 
@@ -91,7 +79,7 @@ if __name__ == "__main__":
 
     plant_api_data = fetch_all_plant_data()
 
-    convert_plant_data_to_csv(plant_api_data)
+    plants = pd.DataFrame(plant_api_data)
 
     # get the end time
     et = time.time()

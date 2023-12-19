@@ -7,8 +7,9 @@ import time
 from os import environ
 
 from dotenv import load_dotenv
+import pandas as pd
 
-from extract import fetch_all_plant_data, convert_plant_data_to_csv
+from extract import fetch_all_plant_data
 from transform import standardize_country_name, remove_rows_with_null, check_soil_moisture_valid, check_soil_temp_valid, normalize_datetimes, change_temp_and_moisture_to_two_dp
 from load import create_database_connection, insert_into_recordings_table
 
@@ -25,7 +26,7 @@ if __name__ == "__main__":
         plant_api_data = fetch_all_plant_data()
 
         # Creates a csv file for the data and returns a data frame
-        plants = convert_plant_data_to_csv(plant_api_data)
+        plants = pd.DataFrame(plant_api_data)
 
         # Location formatting
         plants["Country"] = plants["Country's Initials"].apply(
