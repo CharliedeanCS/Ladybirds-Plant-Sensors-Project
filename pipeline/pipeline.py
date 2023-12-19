@@ -49,8 +49,8 @@ if __name__ == "__main__":
         connection = create_database_connection(environ)
 
         # Inserts the current iterations data into the SQL Server
-        insert_into_location_table(connection, plants)
         insert_into_botanist_table(connection, plants)
+        insert_into_location_table(connection, plants)
         insert_into_plant_table(connection, plants)
 
         insert_into_recordings_table(connection, plants)
@@ -62,4 +62,4 @@ if __name__ == "__main__":
         elapsed_time = et - st
         print('Execution time:', elapsed_time, 'seconds')
 
-        time.sleep(30)
+        time.sleep(20)

@@ -83,7 +83,7 @@ def insert_into_plant_table(conn: Connection, plant_data: list[dict]) -> None:
         query = sql.text(
             "SELECT plant_id FROM s_delta.plant WHERE name = (:name)")
         args = ({"name": plant["Name"]})
-        id = connection.execute(query, args).fetchone()
+        id = conn.execute(query, args).fetchone()
 
         if id is None:
 
