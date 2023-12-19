@@ -66,26 +66,38 @@ def change_temp_and_moisture_to_two_dp(dataframe: pd.DataFrame) -> pd.DataFrame:
     return dataframe
 
 
+def csv_to_data_frame(filename: str) -> pd.DataFrame:
+    """Converts a csv file to a pandas data frame."""
+
+    return pd.read_csv(filename)
+
+
+def upload_clean_csv_file(filename: str, plant_data: pd.DataFrame) -> None:
+    """Creates a new CSV file with the clean data"""
+
+    plants.to_csv(('./data/cleaned_plant_data.csv'), index=False)
+
+
 if __name__ == "__main__":
 
-    df = pd.read_csv("plant_data.csv")
+    plants = csv_to_data_frame("./data/plant_data.csv")
 
     # Location formatting
-    df["Country"] = df["Country's Initials"].apply(
+    plants["Country"] = plants["Country's Initials"].apply(
         standardize_country_name)
 
     # Drop redundant columns
-    df = df.drop("Country's Initials", axis=1)
+    plants = plants.drop("Country's Initials", axis=1)
 
     # Drop rows with null values in important columns
-    df = remove_rows_with_null(df, ["Id", "Name", "Recording Taken", "Soil Moisture",
-                               "Temperature", "Botanist Name", "Botanist Email", "Botanist Phone"])
+    plants = remove_rows_with_null(plants, ["Id", "Name", "Recording Taken", "Soil Moisture",
+                                            "Temperature", "Botanist Name", "Botanist Email", "Botanist Phone"])
 
     # Validate and round moisture and temperature values
-    df = check_soil_moisture_valid(df)
-    df = check_soil_temp_valid(df)
-    df = normalize_datetimes(df)
-    df = change_temp_and_moisture_to_two_dp(df)
+    plants = check_soil_moisture_valid(plants)
+    plants = check_soil_temp_valid(plants)
+    plants = normalize_datetimes(plants)
+    plants = change_temp_and_moisture_to_two_dp(plants)
 
     # Add clean data to new file
-    df.to_csv(('cleaned_plant_data.csv'), index=False)
+    upload_clean_csv_file('./data/cleaned_plant_data.csv', plants)
