@@ -52,7 +52,7 @@ def extract_location_data(csv_data: list[dict]) -> list[dict]:
     return unique_locations
 
 
-def extract_plant_data(csv_data: list[dict],botanist_data: list[dict], location_data: list[dict]) -> list[dict]:
+def extract_plant_data(csv_data: list[dict], botanist_data: list[dict], location_data: list[dict]) -> list[dict]:
     """Extracts relevant plant data from the cleaned .csv file, combines with the 
     botanist and location data, returns a list of unique dicts to seed the plant table."""
     plants = []
