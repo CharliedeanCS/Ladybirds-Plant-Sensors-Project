@@ -77,8 +77,6 @@ def test_normalize_datetimes():
 
     df = normalize_datetimes(df)
 
-    print(df.to_dict())
-
     assert df.to_dict() == {'Plant Name': {0: 'PlantA'},
                             'Last Watered': {0: pd.Timestamp('2023-12-18 14:03:04')},
                             'Recording Taken': {0: pd.Timestamp('2023-12-18 14:03:04+0000', tz='GMT')}}
