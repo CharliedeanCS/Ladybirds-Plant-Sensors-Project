@@ -28,11 +28,11 @@ resource "aws_ecs_task_definition" "c9-ladybirds-pipeline-task" {
 [
   {
     "environment": [
-      {"name": "DATABASE_IP", "value": "${var.database_ip}"},
-      {"name": "DATABASE_NAME", "value": "${var.database_name}"},
-      {"name": "DATABASE_PASSWORD", "value": "${var.database_password}"},
-      {"name": "DATABASE_PORT", "value": "${var.database_port}"},
-      {"name": "DATABASE_USERNAME", "value": "${var.database_username}"}
+      {"name": "DB_HOST", "value": "${var.database_ip}"},
+      {"name": "DB_NAME", "value": "${var.database_name}"},
+      {"name": "DB_PASSWORD", "value": "${var.database_password}"},
+      {"name": "DB_PORT", "value": "${var.database_port}"},
+      {"name": "DB_USERNAME", "value": "${var.database_username}"}
     ],
     "name": "c9-ladybirds-pipeline",
     "image": "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-ladybirds-pipeline:latest",
@@ -47,24 +47,18 @@ TASK_DEFINITION
   }
 }
 
-resource "null_resource" "c9-ladybirds-pipeline-task" {
-  depends_on = [
-    aws_ecs_task_definition.c9-ladybirds-pipeline-task    
-  ]
+resource "aws_ecs_service" "c9-ladybirds-pipeline" {
+  name            = "c9-ladybirds-pipeline"
+  cluster         = "c9-ecs-cluster"
+  task_definition = aws_ecs_task_definition.c9-ladybirds-pipeline-task.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+  force_new_deployment = true 
+  depends_on = [aws_ecs_task_definition.c9-ladybirds-pipeline-task]
 
-  provisioner "local-exec" {
-    command = <<EOF
-    aws ecs run-task \
-      --region eu-west-2 \
-      --cluster arn:aws:ecs:eu-west-2:129033205317:cluster/c9-ecs-cluster \
-      --task-definition c9-ladybirds-pipeline-task \
-      --count 1 --launch-type FARGATE \
-      --network-configuration '{    
-      "awsvpcConfiguration": {
-      "assignPublicIp":"ENABLED",
-      "subnets": ["subnet-0d0b16e76e68cf51b","subnet-081c7c419697dec52","subnet-02a00c7be52b00368"]
-      }
-      }'
-EOF
+network_configuration {
+    security_groups = ["sg-020697b6514174b72"]
+    subnets         = ["subnet-0d0b16e76e68cf51b","subnet-081c7c419697dec52","subnet-02a00c7be52b00368"]
+    assign_public_ip = true
   }
 }
