@@ -19,7 +19,7 @@ GO
 
 CREATE TABLE s_delta.location (
     location_id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
-    region VARCHAR,
+    region VARCHAR(100) UNIQUE,
     country VARCHAR(50),
     continent VARCHAR(20)
 );
@@ -28,14 +28,14 @@ GO
 CREATE TABLE s_delta.botanist(
     botanist_id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
     name VARCHAR(100),
-    email VARCHAR(100),
+    email VARCHAR(100) UNIQUE,
     telephone_number VARCHAR(20)
 );
 GO
 
 CREATE TABLE s_delta.plant(
-    plant_id INT NOT NULL IDENTITY(1, 1) PRIMARY KEY,
-    name VARCHAR(100),
+    plant_id INT NOT NULL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE,
     location_id INT,
     botanist_id INT,
     FOREIGN KEY (location_id) REFERENCES s_delta.location (location_id),
@@ -51,5 +51,5 @@ CREATE TABLE s_delta.recording(
     recording_taken DATETIME NOT NULL,
     last_watered DATETIME NOT NULL,
     FOREIGN KEY (plant_id) REFERENCES s_delta.plant (plant_id)
-    );
-    GO
+);
+GO

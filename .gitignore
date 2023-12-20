@@ -86,7 +86,7 @@ __pycache__
 .ipynb_checkpoints
 venv/
 .pytest_cache
-
+.coverage
 
 .env
 
@@ -96,5 +96,7 @@ venv/
 
 *.tfvars
 .terraform
+terraform/.terraform.lock.hcl
+.terraform.tfstate.lock.info
 
 terraform.*
