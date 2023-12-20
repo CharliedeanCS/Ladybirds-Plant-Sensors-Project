@@ -9,7 +9,6 @@ from os import environ, _Environ
 import pandas as pd
 from boto3 import client
 from mypy_boto3_s3 import S3Client
-from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, sql, Connection
 
