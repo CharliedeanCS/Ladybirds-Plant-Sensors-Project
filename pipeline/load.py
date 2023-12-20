@@ -23,7 +23,7 @@ def create_database_connection(config: _Environ) -> Connection:
 
 
 def insert_into_location_table(connection: Connection, plant_data: pd.DataFrame) -> None:
-    """Inserts data from a pandas data frame into a SQL Server into the location table"""
+    """Inserts data from a pandas data frame into a SQL Server into the location table."""
 
     plant_list = plant_data.values.tolist()
 
