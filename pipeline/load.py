@@ -1,4 +1,4 @@
-"""Script to connect to an MSSQL database and insert plant data"""
+"""Script to connect to an MSSQL database and insert plant data."""
 
 
 from os import environ, _Environ
@@ -12,7 +12,7 @@ from transform import csv_to_data_frame
 
 
 def create_database_connection(config: _Environ) -> Connection:
-    """Creates a database connection to the SQL Server"""
+    """Creates a database connection to the SQL Server."""
 
     engine = create_engine(
         f"mssql+pymssql://{config['DB_USERNAME']}:{config['DB_PASSWORD']}@{config['DB_HOST']}/?charset=utf8")
@@ -23,7 +23,7 @@ def create_database_connection(config: _Environ) -> Connection:
 
 
 def insert_into_location_table(connection: Connection, plant_data: pd.DataFrame) -> None:
-    """Inserts data from a pandas data frame into a SQL Server into the location table"""
+    """Inserts data from a pandas data frame into a SQL Server into the location table."""
 
     plant_list = plant_data.values.tolist()
 
@@ -47,7 +47,7 @@ def insert_into_location_table(connection: Connection, plant_data: pd.DataFrame)
 
 
 def insert_into_botanist_table(connection: Connection, plant_data: pd.DataFrame) -> None:
-    """Inserts data from a pandas data frame into a SQL Server into the location table"""
+    """Inserts data from a pandas data frame into a SQL Server into the location table."""
 
     plant_list = plant_data.values.tolist()
 
@@ -56,8 +56,8 @@ def insert_into_botanist_table(connection: Connection, plant_data: pd.DataFrame)
         connection.execute(sql.text("USE plants;"))
 
         query = sql.text(
-            "SELECT botanist_id FROM s_delta.botanist WHERE telephone_number = (:telephone)")
-        args = ({"telephone": plant[8]})
+            "SELECT botanist_id FROM s_delta.botanist WHERE email = (:email)")
+        args = ({"email": plant[7]})
         id = connection.execute(query, args).fetchone()
 
         if id is None:
@@ -88,8 +88,8 @@ def insert_into_plant_table(conn: Connection, plant_data: list[dict]) -> None:
         if id is None:
 
             query = sql.text(
-                "SELECT botanist_id FROM s_delta.botanist WHERE telephone_number = (:num)")
-            args = ({"num": plant["Botanist Phone"]})
+                "SELECT botanist_id FROM s_delta.botanist WHERE email = (:email)")
+            args = ({"email": plant["Botanist Email"]})
             botanist_id = conn.execute(query, args).fetchone()[0]
 
             query = sql.text(
@@ -105,7 +105,7 @@ def insert_into_plant_table(conn: Connection, plant_data: list[dict]) -> None:
 
 
 def insert_into_recordings_table(connection: Connection, plant_data: pd.DataFrame) -> None:
-    """Inserts data from a pandas data frame into a SQL Server into the recording table"""
+    """Inserts data from a pandas data frame into a SQL Server into the recording table."""
 
     plant_list = plant_data.values.tolist()
 
