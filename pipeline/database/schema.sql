@@ -38,8 +38,8 @@ CREATE TABLE s_delta.plant(
     name VARCHAR(100) UNIQUE,
     location_id INT,
     botanist_id INT,
-    FOREIGN KEY (location_id) REFERENCES s_delta.location (location_id),
-    FOREIGN KEY (botanist_id) REFERENCES s_delta.botanist (botanist_id)
+    FOREIGN KEY (location_id) REFERENCES s_delta.location (location_id) ON DELETE CASCADE,
+    FOREIGN KEY (botanist_id) REFERENCES s_delta.botanist (botanist_id) ON DELETE CASCADE
 );
 GO
 
@@ -50,6 +50,6 @@ CREATE TABLE s_delta.recording(
     temperature FLOAT,
     recording_taken DATETIME NOT NULL,
     last_watered DATETIME NOT NULL,
-    FOREIGN KEY (plant_id) REFERENCES s_delta.plant (plant_id)
+    FOREIGN KEY (plant_id) REFERENCES s_delta.plant (plant_id) ON DELETE CASCADE
 );
 GO
