@@ -96,3 +96,103 @@ TASK_DEFINITION
     cpu_architecture        = "X86_64"
   }
 }
+
+
+# Create a resource that allows running ecs tasks
+resource "aws_iam_policy" "ecs-schedule-permissions" {
+    name = "ExecuteECSFunctions"
+    policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecs:RunTask"
+            ],
+            "Resource": [
+                aws_ecs_task_definition.c9-ladybirds-load-old-data-task.arn
+            ],
+            "Condition": {
+                "ArnLike": {
+                    "ecs:cluster": "arn:aws:ecs:eu-west-2:129033205317:cluster/c9-ecs-cluster"
+                }
+            }
+        },
+        {
+            "Effect": "Allow",
+            "Action": "iam:PassRole",
+            "Resource": [
+                "*"
+            ],
+            "Condition": {
+                "StringLike": {
+                    "iam:PassedToService": "ecs-tasks.amazonaws.com"
+                }
+            }
+        }
+    ]
+})
+}
+
+
+resource "aws_iam_role" "iam_for_ecs" {
+  name = "ECSPermissionsForIAM-73sfa"
+
+  assume_role_policy = <<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    },
+    {
+      "Effect": "Allow",
+      "Principal": {
+          "Service": "scheduler.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+      }
+    ]
+}
+EOF
+}
+
+# Attach the policy to the role
+resource "aws_iam_role_policy_attachment" "attach-ecs-policy" {
+  role       = aws_iam_role.iam_for_ecs.name
+  policy_arn = aws_iam_policy.ecs-schedule-permissions.arn
+}
+
+
+
+resource "aws_scheduler_schedule" "c9-ladybirds-load-old-data" {
+  name        = "c9-ladybirds-load-old-data"
+  group_name  = "default"
+
+  flexible_time_window {
+    maximum_window_in_minutes = 15
+    mode = "FLEXIBLE"
+  }
+  schedule_expression_timezone = "Europe/London"
+  schedule_expression = "cron(09 15 * * ? *)" 
+
+  target {
+    arn      = "arn:aws:ecs:eu-west-2:129033205317:cluster/c9-ecs-cluster" # arn of the ecs cluster to run on
+    # role that allows scheduler to start the task (explained later)
+    role_arn = aws_iam_role.iam_for_ecs.arn
+
+    ecs_parameters {
+      task_definition_arn = aws_ecs_task_definition.c9-ladybirds-load-old-data-task.arn
+      launch_type         = "FARGATE"
+
+    network_configuration {
+        subnets         = ["subnet-0d0b16e76e68cf51b","subnet-081c7c419697dec52","subnet-02a00c7be52b00368"]
+        assign_public_ip = true
+      }
+    }
+  }
+}
