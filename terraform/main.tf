@@ -62,3 +62,37 @@ network_configuration {
     assign_public_ip = true
   }
 }
+
+
+
+resource "aws_ecs_task_definition" "c9-ladybirds-load-old-data-task" {
+  family                   = "c9-ladybirds-load-old-data-task"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 1024
+  memory                   = 2048
+  execution_role_arn       = "${data.aws_iam_role.ecs_task_execution_role.arn}"
+  container_definitions    = <<TASK_DEFINITION
+[
+  {
+    "environment": [
+      {"name": "DB_HOST", "value": "${var.database_ip}"},
+      {"name": "DB_NAME", "value": "${var.database_name}"},
+      {"name": "DB_PASSWORD", "value": "${var.database_password}"},
+      {"name": "DB_PORT", "value": "${var.database_port}"},
+      {"name": "DB_USERNAME", "value": "${var.database_username}"},
+      {"name": "AWS_ACCESS_KEY_ID", "value": "${var.aws_access_key_id}"},
+      {"name": "AWS_SECRET_ACCESS_KEY", "value": "${var.aws_secret_access_key}"}
+    ],
+    "name": "c9-ladybirds-load-old-data",
+    "image": "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-ladybirds-load-old-data:latest",
+    "essential": true
+  }
+]
+TASK_DEFINITION
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
+}
