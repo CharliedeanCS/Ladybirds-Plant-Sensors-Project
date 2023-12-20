@@ -1,6 +1,6 @@
 pylint
 pytest
 pandas
-sqlalchemy
 boto3
 python-dotenv
+sqlalchemy
