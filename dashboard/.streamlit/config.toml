@@ -1,10 +1,10 @@
 [theme]
 
 # primary accent colour for side bar.
-primaryColor = '#a2236d'
+primaryColor = '#B99470'
 
 # background colour for main content area.
-backgroundColor = '#f3e0dd'
+backgroundColor = '#FAF1E4'
 
 # secondary background colour.
-secondaryBackgroundColor = '#e1c4d3'
+secondaryBackgroundColor = '#5F6F52'
