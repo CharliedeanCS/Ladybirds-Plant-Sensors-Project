@@ -178,7 +178,7 @@ resource "aws_scheduler_schedule" "c9-ladybirds-load-old-data" {
     mode = "FLEXIBLE"
   }
   schedule_expression_timezone = "Europe/London"
-  schedule_expression = "cron(09 15 * * ? *)" 
+  schedule_expression = "cron(05 09 * * ? *)" 
 
   target {
     arn      = "arn:aws:ecs:eu-west-2:129033205317:cluster/c9-ecs-cluster" # arn of the ecs cluster to run on
