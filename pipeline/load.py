@@ -105,7 +105,7 @@ def insert_into_plant_table(conn: Connection, plant_data: list[dict]) -> None:
 
 
 def insert_into_recordings_table(connection: Connection, plant_data: pd.DataFrame) -> None:
-    """Inserts data from a pandas data frame into a SQL Server into the recording table"""
+    """Inserts data from a pandas data frame into a SQL Server into the recording table."""
 
     plant_list = plant_data.values.tolist()
 
