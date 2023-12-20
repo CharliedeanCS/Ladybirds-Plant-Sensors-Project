@@ -86,7 +86,7 @@ __pycache__
 .ipynb_checkpoints
 venv/
 .pytest_cache
-
+.coverage
 
 .env
 
