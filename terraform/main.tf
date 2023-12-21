@@ -205,10 +205,17 @@ resource "aws_security_group" "c9_ladybirds_dashboard_sg" {
 
   ingress {
     description      = "TLS from VPC"
-    from_port        = 8501
-    to_port          = 8501
+    from_port        = 4321
+    to_port          = 4321
     protocol         = "tcp"
     cidr_blocks      = ["0.0.0.0/0"] 
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
   }
 
   tags = {
@@ -229,19 +236,18 @@ resource "aws_ecs_task_definition" "c9-ladybirds-dashboard-task" {
 [
   {
     "environment": [
-      {"name": "DATABASE_IP", "value": "${var.database_ip}"},
-      {"name": "DATABASE_NAME", "value": "${var.database_name}"},
-      {"name": "DATABASE_PASSWORD", "value": "${var.database_password}"},
-      {"name": "DATABASE_PORT", "value": "${var.database_port}"},
-      {"name": "DATABASE_USERNAME", "value": "${var.database_username}"}
+      {"name": "DB_HOST", "value": "${var.database_ip}"},
+      {"name": "DB_PASSWORD", "value": "${var.database_password}"},
+      {"name": "DB_PORT", "value": "${var.database_port}"},
+      {"name": "DB_USERNAME", "value": "${var.database_username}"}
     ],
     "name": "c9-ladybirds-dashboard",
-    "image": "CHANGE",
+    "image": "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-ladybirds-dashboard:latest",
     "essential": true,
     "portMappings" : [
         {
-          "containerPort" : 8501,
-          "hostPort"      : 8501
+          "containerPort" : 4321,
+          "hostPort"      : 4321
         }
       ]
   }
