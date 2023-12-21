@@ -58,7 +58,7 @@ def fetch_plant_data(current_plant):
     Fetches data for a single plant.
     """
     try:
-        response = requests.get(f"{API_URL}{current_plant}", timeout=10)
+        response = requests.get(f"{API_URL}{current_plant}", timeout=20)
         plant_json = response.json()
         plant_keys = plant_json.keys()
 

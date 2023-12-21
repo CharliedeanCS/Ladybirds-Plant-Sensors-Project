@@ -25,3 +25,15 @@ variable "database_name" {
   type        = string
   default = "value"
 }
+
+variable "aws_access_key_id" {
+  description = "Value of the aws access key id"
+  type        = string
+  default = "value"
+}
+
+variable "aws_secret_access_key" {
+  description = "Value of the aws secret access key"
+  type        = string
+  default = "value"
+}
