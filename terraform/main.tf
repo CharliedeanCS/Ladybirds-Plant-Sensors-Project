@@ -196,3 +196,82 @@ resource "aws_scheduler_schedule" "c9-ladybirds-load-old-data" {
     }
   }
 }
+
+
+resource "aws_security_group" "c9_ladybirds_dashboard_sg" {
+  name        = "c9_ladybirds_dashboard_sg"
+  description = "Allow TLS inbound traffic"
+  vpc_id      = "vpc-04423dbb18410aece"
+
+  ingress {
+    description      = "TLS from VPC"
+    from_port        = 4321
+    to_port          = 4321
+    protocol         = "tcp"
+    cidr_blocks      = ["0.0.0.0/0"] 
+  }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+
+  tags = {
+    Name = "c9_ladybirds_dashboard_sg"
+  }
+}
+
+
+
+resource "aws_ecs_task_definition" "c9-ladybirds-dashboard-task" {
+  family                   = "c9-ladybirds-dashboard-task"
+  requires_compatibilities = ["FARGATE"]
+  network_mode             = "awsvpc"
+  cpu                      = 1024
+  memory                   = 2048
+  execution_role_arn       = "${data.aws_iam_role.ecs_task_execution_role.arn}"
+  container_definitions    = <<TASK_DEFINITION
+[
+  {
+    "environment": [
+      {"name": "DB_HOST", "value": "${var.database_ip}"},
+      {"name": "DB_PASSWORD", "value": "${var.database_password}"},
+      {"name": "DB_PORT", "value": "${var.database_port}"},
+      {"name": "DB_USERNAME", "value": "${var.database_username}"}
+    ],
+    "name": "c9-ladybirds-dashboard",
+    "image": "129033205317.dkr.ecr.eu-west-2.amazonaws.com/c9-ladybirds-dashboard:latest",
+    "essential": true,
+    "portMappings" : [
+        {
+          "containerPort" : 4321,
+          "hostPort"      : 4321
+        }
+      ]
+  }
+]
+TASK_DEFINITION
+
+  runtime_platform {
+    operating_system_family = "LINUX"
+    cpu_architecture        = "X86_64"
+  }
+}
+
+resource "aws_ecs_service" "c9-ladybirds-dashboard" {
+  name            = "c9-ladybirds-dashboard"
+  cluster         = "c9-ecs-cluster"
+  task_definition = aws_ecs_task_definition.c9-ladybirds-dashboard-task.arn
+  desired_count   = 1
+  launch_type     = "FARGATE"
+  force_new_deployment = true 
+  depends_on = [aws_ecs_task_definition.c9-ladybirds-dashboard-task]
+
+network_configuration {
+    security_groups = [aws_security_group.c9_ladybirds_dashboard_sg.id]
+    subnets         = ["subnet-0d0b16e76e68cf51b","subnet-081c7c419697dec52","subnet-02a00c7be52b00368"]
+    assign_public_ip = true
+  }
+}
