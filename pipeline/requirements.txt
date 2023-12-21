@@ -3,14 +3,11 @@ pytest
 requests
 pandas
 sqlalchemy
-<<<<<<< HEAD
 boto3
 python-dotenv
-=======
 country_converter
 python-dotenv
 pymssql
->>>>>>> 90cbb8bb1504623a0250585466d415026dd1134a
 boto3
 python-dotenv
 country_converter
