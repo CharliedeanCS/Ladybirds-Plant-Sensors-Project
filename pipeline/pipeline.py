@@ -7,6 +7,7 @@ import time
 from os import environ
 import logging
 
+import requests
 from dotenv import load_dotenv
 import pandas as pd
 
@@ -24,6 +25,7 @@ if __name__ == "__main__":
         start_time = time.time()
 
         # Fetches all plant data from the api
+
         plant_api_data = fetch_all_plant_data()
 
         extract_time = time.time() - start_time
@@ -72,4 +74,4 @@ if __name__ == "__main__":
         elapsed_time = et - start_time
         print('Total execution time:', elapsed_time, 'seconds')
 
-        time.sleep(20)
+        time.sleep(30)
