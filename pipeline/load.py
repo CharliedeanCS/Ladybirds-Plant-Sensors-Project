@@ -40,7 +40,7 @@ def insert_into_location_table(connection: Connection, plant_data: pd.DataFrame)
 
             query = sql.text(
                 """INSERT INTO s_delta.location (region,country,continent)
-                VALUES (:region,:continent,:country)""")
+                VALUES (:region,:country,:continent)""")
             connection.execute(
                 query, {"region": region, "continent": continent, "country": country})
 
