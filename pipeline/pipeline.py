@@ -8,6 +8,7 @@ from os import environ
 import logging
 from datetime import datetime
 
+import requests
 from dotenv import load_dotenv
 import pandas as pd
 
@@ -31,6 +32,7 @@ if __name__ == "__main__":
         logging.debug(str(datetime.now()) + ': Initializing pipeline')
 
         # Fetches all plant data from the api
+
         plant_api_data = fetch_all_plant_data()
 
         extract_time = time.time() - start_time
@@ -83,4 +85,4 @@ if __name__ == "__main__":
         logging.debug(str(datetime.now()) + ': Total execution time: ' +
                       str(elapsed_time) + ' seconds')
 
-        time.sleep(20)
+        time.sleep(30)
