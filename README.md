@@ -11,7 +11,19 @@ To do this, the team will:
 Terraform:
 This project contains a terraform folder that has the capability to to provision the infrastructure of the pipeline.
 
+Dashboard:
+This project contains a dashboard folder. This folder contains the code to run a Streamlit dashboard that can be hosted on AWS.
+This dashboard allows us:
+- To be able to view the data in real-time
+- To view graphs of the latest temperature and moisture readings for every plant
+- To be able to view the data from the long-term storage
+
+
 ## Repository Contents
+- dashboard
+  - dashboard.py
+- ecs-load-old-data
+  - ecs_load_to_s3.py
 - pipeline
   - database
     - schema.sql
@@ -50,6 +62,11 @@ This file should contain the variables:
 `database_username`
 `database_password`
 `database_name`
+
+In the `ecs-load-old-data` folder and `dashboard` folder .env file must be made. This env should have the same keys as the `pipeline` folder:
+It also should include:
+`AWS_ACCESS_KEY_ID`
+`AWS_SECRET_ACCESS_KEY`
 
 ## Running the script
 
