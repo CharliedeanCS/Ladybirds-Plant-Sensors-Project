@@ -3,6 +3,7 @@ pytest
 requests
 pandas
 sqlalchemy
-country_converter
+boto3
 python-dotenv
+country_converter
 pymssql

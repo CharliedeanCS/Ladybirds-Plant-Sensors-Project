@@ -5,7 +5,6 @@ from os import environ, _Environ
 
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, sql, Connection
-from sqlalchemy.exc import IntegrityError, ProgrammingError
 import pandas as pd
 
 from transform import csv_to_data_frame
@@ -17,9 +16,9 @@ def create_database_connection(config: _Environ) -> Connection:
     engine = create_engine(
         f"mssql+pymssql://{config['DB_USERNAME']}:{config['DB_PASSWORD']}@{config['DB_HOST']}/?charset=utf8")
 
-    conn = engine.connect()
+    connection = engine.connect()
 
-    return conn
+    return connection
 
 
 def insert_into_location_table(connection: Connection, plant_data: pd.DataFrame) -> None:
@@ -32,9 +31,9 @@ def insert_into_location_table(connection: Connection, plant_data: pd.DataFrame)
         query = sql.text(
             "SELECT location_id FROM s_delta.location WHERE region = (:region)")
         args = ({"region": plant[9]})
-        id = connection.execute(query, args).fetchone()
+        plant_id = connection.execute(query, args).fetchone()
 
-        if id is None:
+        if plant_id is None:
             region = plant[9]
             continent = plant[10]
             country = plant[11]
@@ -58,9 +57,9 @@ def insert_into_botanist_table(connection: Connection, plant_data: pd.DataFrame)
         query = sql.text(
             "SELECT botanist_id FROM s_delta.botanist WHERE email = (:email)")
         args = ({"email": plant[7]})
-        id = connection.execute(query, args).fetchone()
+        plant_id = connection.execute(query, args).fetchone()
 
-        if id is None:
+        if plant_id is None:
 
             name = plant[6]
             email = plant[7]
@@ -73,7 +72,7 @@ def insert_into_botanist_table(connection: Connection, plant_data: pd.DataFrame)
                 query, {"name": name, "email": email, "telephone": telephone})
 
 
-def insert_into_plant_table(conn: Connection, plant_data: list[dict]) -> None:
+def insert_into_plant_table(connection: Connection, plant_data: list[dict]) -> None:
     """Seed the plant table with the plant data list and relevant botanist and location ids."""
 
     plant_data = plant_data.to_dict('records')
@@ -83,25 +82,25 @@ def insert_into_plant_table(conn: Connection, plant_data: list[dict]) -> None:
         query = sql.text(
             "SELECT plant_id FROM s_delta.plant WHERE name = (:name)")
         args = ({"name": plant["Name"]})
-        id = conn.execute(query, args).fetchone()
+        plant_id = connection.execute(query, args).fetchone()
 
-        if id is None:
+        if plant_id is None:
 
             query = sql.text(
                 "SELECT botanist_id FROM s_delta.botanist WHERE email = (:email)")
             args = ({"email": plant["Botanist Email"]})
-            botanist_id = conn.execute(query, args).fetchone()[0]
+            botanist_id = connection.execute(query, args).fetchone()[0]
 
             query = sql.text(
                 "SELECT location_id FROM s_delta.location WHERE region = (:region)")
             args = ({"region": plant["Region"]})
-            location_id = conn.execute(query, args).fetchone()[0]
+            location_id = connection.execute(query, args).fetchone()[0]
 
             query = sql.text(
                 "INSERT INTO s_delta.plant (plant_id, name, botanist_id, location_id) VALUES (:id, :name, :b_id, :l_id)")
             args = ({"id": plant["Id"], "name": plant["Name"], "b_id": botanist_id,
                     "l_id": location_id})
-            conn.execute(query, args)
+            connection.execute(query, args)
 
 
 def insert_into_recordings_table(connection: Connection, plant_data: pd.DataFrame) -> None:
@@ -114,7 +113,7 @@ def insert_into_recordings_table(connection: Connection, plant_data: pd.DataFram
         query = sql.text(
             "SELECT plant_id FROM s_delta.plant WHERE name = (:name)")
         args = ({"name": plant[1]})
-        id = connection.execute(query, args).fetchone()[0]
+        plant_id = connection.execute(query, args).fetchone()[0]
 
         soil = plant[4]
         temperature = plant[5]
@@ -126,7 +125,7 @@ def insert_into_recordings_table(connection: Connection, plant_data: pd.DataFram
         query = sql.text(
             """INSERT INTO s_delta.recording (plant_id,soil_moisture,temperature,recording_taken,last_watered)
             VALUES (:id,:soil,:temperature,:recording,:watered)""")
-        connection.execute(query, {"id": id, "soil": soil, "temperature": temperature, "recording": recording,
+        connection.execute(query, {"id": plant_id, "soil": soil, "temperature": temperature, "recording": recording,
                                    "watered": watered})
 
     connection.execute(sql.text("COMMIT;"))
@@ -138,10 +137,10 @@ if __name__ == "__main__":
 
     plant_dataframe = csv_to_data_frame('./data/cleaned_plant_data.csv')
 
-    connection = create_database_connection(environ)
+    conn = create_database_connection(environ)
 
-    insert_into_botanist_table(connection, plant_dataframe)
-    insert_into_location_table(connection, plant_dataframe)
-    insert_into_plant_table(connection, plant_dataframe)
+    insert_into_botanist_table(conn, plant_dataframe)
+    insert_into_location_table(conn, plant_dataframe)
+    insert_into_plant_table(conn, plant_dataframe)
 
-    insert_into_recordings_table(connection, plant_dataframe)
+    insert_into_recordings_table(conn, plant_dataframe)
