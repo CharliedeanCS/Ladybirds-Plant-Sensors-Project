@@ -3,3 +3,5 @@ altair
 pylint
 streamlit
 python-dotenv
+sqlalchemy
+pymssql
