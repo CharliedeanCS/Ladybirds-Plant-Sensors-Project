@@ -1,6 +1,6 @@
-# Pipeline
+# Transfer Old Data
 
-This folder should contain all code and resources required for the pipeline.
+This folder contains all the code and resources used for transferring old data.
 
 # Project Description
 
@@ -23,4 +23,6 @@ This folder should contain all code and resources required for the pipeline.
 - `test_transfer_old_data.py`
     - A script containing unit tests for the `transfer_old_data.py` script
 - `Dockerfile`
-    - 
+    - A file which is used to build a Docker image of the `transfer_old_data.py` program
+    - To build this image, run the command `docker build -t <image-name> .`
+    - To run the container, run the command `docker run --env-file .env <image-name>`
