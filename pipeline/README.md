@@ -1,21 +1,25 @@
 # Pipeline
 This directory contains all code and resources required for the pipeline. The pipeline is broken down into three main stages - an extract stage, transform stage and load stage. Also included in the folder is a text file detailing requirements, a dockerfile and a database sub-directory that contains a .sql file that allows the creation of the database as required. 
 
-# Project Description
-- In order to be able to analyse data coming from sensors in the museum on each plant, data needs to be extracted from respective API endpoints for each plant at the museum. The extract script achieves this using a 'session' object created using the requests library. The data coming from the API is relatively clean but needs to be adjusted to allow it to be fit to the structure of the database that has been designed for storing data on each of the plants. This process of normalizing data and excluding faults is carried out by the transform script. Finally, data is loaded into the RDS database via the load script - where other services such as the dashboard and the service that loads the archive database are able to extract data.
+# 📝 Project Description
+- In order to be able to analyse data coming from sensors in the museum on each plant, data needs to be extracted from respective API endpoints for each plant at the museum. The extract script achieves this using a 'session' object created using the requests library.
+- The data coming from the API is relatively clean but needs to be adjusted to allow it to be fit to the structure of the database that has been designed for storing data on each of the plants. This process of normalizing data and excluding faults is carried out by the transform script.
+- Finally, data is loaded into the RDS database via the load script - where other services such as the dashboard and the service that loads the archive database are able to extract data.
 - The pipeline has also incorporated functionality that creates a log of every run of the pipeline and the timestamp - as well as runtime - associated with each phase of the pipeline
 
 ## :hammer_and_wrench: Getting Setup
 
-Running on python:latest
 1. `pip install -r requirements.txt` - command to install all necessary requirements to working directory
-2. .env keys used:\
-    `DB_HOST`\
-    `DB_PORT`\
-    `DB_USERNAME`\
-    `DB_PASSWORD`\
-    `DB_NAME`
-3. To activate pipeline - run `python3 pipeline.py`
+2. `.env` keys used:
+    - `DB_HOST`
+    - `DB_PORT`
+    - `DB_USERNAME`
+    - `DB_PASSWORD`
+    - `DB_NAME`
+
+## 🏃 Running the pipeline locally
+
+Run the command `python3 pipeline.py`
 
 ## :card_index_dividers: Files Explained
 
@@ -29,7 +33,7 @@ Running on python:latest
 
 - `Dockerfile` : A dockerfile that outlines the instructions and requirements to be able to containerise the pipeline directory. 
 
-- Database
+- `database`
     - `db_connect.sh` : shell script that allows quick connection to Microsoft SQL Server database via local terminal
     - `reset_db.sh` : shell script that allows quick reset of Microsoft SQL Server database via local terminal. database is reset to structure defined in schema.sql
     - `schema.sql` : database design outlined in this file. Creation of four tables - plant, location, botanist and recording tables. 
