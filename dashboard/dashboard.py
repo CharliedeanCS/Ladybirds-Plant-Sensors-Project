@@ -51,7 +51,7 @@ def get_archive_data_csv(s3_client: S3Client, bucket: str, key: str) -> pd.DataF
 
 
 def get_db_connection(config: _Environ) -> Connection:
-    """Creates a database connection to the SQL Server"""
+    """Creates a database connection to the SQL Server."""
     engine = create_engine(
         f"mssql+pymssql://{config['DB_USERNAME']}:{config['DB_PASSWORD']}@{config['DB_HOST']}/?charset=utf8")
     conn = engine.connect()
