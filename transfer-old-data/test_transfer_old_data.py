@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock
 
-from ecs_load_to_s3 import extract_old_data_from_database, delete_data_from_db
+from transfer_old_data import extract_old_data_from_database, delete_data_from_db
 
 
 def test_extract_old_data_from_database_execute():
