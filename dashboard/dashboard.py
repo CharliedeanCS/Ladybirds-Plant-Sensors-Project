@@ -1,7 +1,7 @@
 """Script to run the dashboard app, displaying the key plant data for the LNHM botanical wing."""
 from io import StringIO
 from os import environ, _Environ
-import datetime 
+import datetime
 
 import altair as alt
 from dotenv import load_dotenv
@@ -15,7 +15,9 @@ ARCHIVE_BUCKET = "c9-ladybird-lnhm-data-bucket"
 
 ARCHIVE_KEY = 'lmnh_plant_data_archive.csv'
 
-COLOUR_LIST = ['#7db16a', '#c6d485', '#618447', '#5e949b', '#415d2e', '#d7f1ec', '#b7c62d', '#0f1511', '#3e6164', '#87c7cd', '#2d4221', '#6a6539' '#2b4242', '#48472f', '#1e2f1d']
+COLOUR_LIST = ['#7db16a', '#c6d485', '#618447', '#5e949b', '#415d2e',
+               '#d7f1ec', '#b7c62d', '#0f1511', '#3e6164', '#87c7cd',
+               '#2d4221', '#6a6539' '#2b4242', '#48472f', '#1e2f1d']
 
 QUERY = sql.text("""SELECT rec.recording_id, rec.soil_moisture, rec.temperature,
                      rec.recording_taken, rec.last_watered, plant.name AS plant_name,
@@ -36,16 +38,16 @@ COLUMNS = {"recording_id": "Recording ID", "soil_moisture": "Soil Moisture",
 
 def get_s3_client(config: _Environ) -> S3Client:
     """Get a connection to the relevant S3 bucket."""
-    s3_client = client("s3",
+    s3client = client("s3",
                        aws_access_key_id=config["AWS_ACCESS_KEY_ID"],
                        aws_secret_access_key=config["AWS_SECRET_ACCESS_KEY"])
-    return s3_client
+    return s3client
 
 
-def get_archive_data_csv(s3_client: S3Client, bucket: str, key: str) -> pd.DataFrame:
+def get_archive_data_csv(s3client: S3Client, bucket: str, key: str) -> pd.DataFrame:
     """Retrieves the archived data from an S3 bucket."""
 
-    obj = s3_client.get_object(Bucket=bucket, Key=key)
+    obj = s3client.get_object(Bucket=bucket, Key=key)
     csv_str = obj["Body"].read().decode()
     return pd.read_csv(StringIO(csv_str))
 
@@ -74,17 +76,17 @@ def get_date_and_time_from_data(data: pd.DataFrame) -> pd.DataFrame:
     return data
 
 
-def get_last_watered_plants(data: pd.DataFrame, selected_plants: list[str]) -> pd.DataFrame:
+def get_last_watered_plants(data: pd.DataFrame, chosen_plants: list[str]) -> pd.DataFrame:
     """Extracts the most recent value for when each plant was last watered."""
-    data = data[data['Plant Name'].isin(selected_plants)]
+    data = data[data['Plant Name'].isin(chosen_plants)]
     sorted_by_last_watered = data.sort_values(by='Last Watered')
     each_plant_data = sorted_by_last_watered.drop_duplicates('Plant Name', keep='last')
     return each_plant_data[['Plant Name', 'Last Watered']]
 
 
-def temp_line_chart(data: pd.DataFrame, selected_plants: list[str]) -> st.altair_chart:
+def temp_line_chart(data: pd.DataFrame, chosen_plants: list[str]) -> st.altair_chart:
     """Creates a line graph showing temperature of soil throughout the day for plants."""
-    data = data[data['Plant Name'].isin(selected_plants)].rename(
+    data = data[data['Plant Name'].isin(chosen_plants)].rename(
         columns={'Temperature': 'Soil Temperature', 'Recording Taken': 'Time'})
     title = alt.TitleParams(
         'Temperature of soil over time', anchor='middle')
@@ -94,9 +96,9 @@ def temp_line_chart(data: pd.DataFrame, selected_plants: list[str]) -> st.altair
     return figure
 
 
-def moisture_line_chart(data: pd.DataFrame, selected_plants: list[str]) -> st.altair_chart:
+def moisture_line_chart(data: pd.DataFrame, chosen_plants: list[str]) -> st.altair_chart:
     """Creates a line graph showing moisture levels of soil throughout the day for plants."""
-    data = data[data['Plant Name'].isin(selected_plants)].rename(
+    data = data[data['Plant Name'].isin(chosen_plants)].rename(
         columns={'Recording Taken': 'Time'})
     title = alt.TitleParams(
         'Moisture Level of soil over time', anchor='middle')
@@ -106,19 +108,21 @@ def moisture_line_chart(data: pd.DataFrame, selected_plants: list[str]) -> st.al
     return figure
 
 
-def filter_by_date(chosen_date: datetime.date, current_data: pd.DataFrame, archived_data: pd.DataFrame) -> pd.DataFrame:
-    """Filters by the chosen date, returns the relevant data to be displayed in a pandas dataframe."""
+def filter_by_date(chosen_date: datetime.date,
+                   current_data: pd.DataFrame,
+                   archived_data: pd.DataFrame) -> pd.DataFrame:
+    """Filters by the chosen date, returns relevant data to be displayed in a pandas dataframe."""
     if chosen_date == datetime.date.today():
-        relevant_data = current_data
+        data = current_data
     else:
-        relevant_data = archived_data[(archived_data['date'] == chosen_date)]
-    return relevant_data
+        data = archived_data[(archived_data['date'] == chosen_date)]
+    return data
 
 
 def filter_by_country(data: pd.DataFrame) -> list[str]:
     """Retrieves the plants relevant to the selected countries and returns plant names as a list."""
     chosen_countries = st.sidebar.multiselect("Select Country", data['Country'].unique(),
-                                default=None, placeholder="Choose an option")
+                                                default=None, placeholder="Choose an option")
 
     country_plants = data[data['Country'].isin(chosen_countries)]['Plant Name'].unique()
     chosen_plants = st.sidebar.multiselect("Select Plant", country_plants,
@@ -130,12 +134,13 @@ def filter_by_country(data: pd.DataFrame) -> list[str]:
 def filter_by_botanist(data: pd.DataFrame) -> list[str]:
     """Retrieves the plants relevant to the selected botanists and returns plant names as a list."""
     chosen_botanists = st.sidebar.multiselect("Select Botanist", data['Botanist Name'].unique(),
-                                            default=data['Botanist Name'].unique(), placeholder="Choose an option")
+                                            default=data['Botanist Name'].unique(),
+                                            placeholder="Choose an option")
 
     botanist_plants = data[data['Botanist Name'].isin(chosen_botanists)]['Plant Name'].unique()
     chosen_plants = st.sidebar.multiselect("Select Plant", botanist_plants,
                                             default=None, placeholder="Choose an option")
-    
+
     return chosen_plants
 
 
@@ -188,7 +193,7 @@ if __name__ == "__main__":
 
     if filter_choice == "Country":
         selected_plants = filter_by_country(relevant_data)
-        
+
     if filter_choice == "Botanist":
         selected_plants = filter_by_botanist(relevant_data)
 
@@ -199,10 +204,7 @@ if __name__ == "__main__":
 
     elif selected_plants:
         soil_monitoring_charts(relevant_data, selected_plants)
-        
+
     else:
         st.subheader('Please use the filters to display relevant data :hibiscus:',
                      anchor=None, divider='grey', )
-    
-    
-
