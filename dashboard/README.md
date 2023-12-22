@@ -2,7 +2,7 @@
 
 This folder should contain all code and resources required for dashboard to run.
 
-# Project Description
+# 📝 Project Description
 
 In order to easily visualise the plant sensor data, a dashboard was created. This allows the botanists to track specific plants and ensure their soil temperature and water levels are normal. As well as track when they were last watered. 
 
