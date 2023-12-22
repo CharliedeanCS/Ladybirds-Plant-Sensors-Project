@@ -53,12 +53,12 @@ def flatten_and_organize_data(plant_dict: dict) -> dict:
     return new_plant_dict
 
 
-def fetch_plant_data(current_plant):
+def fetch_plant_data(current_plant, session):
     """
     Fetches data for a single plant.
     """
     try:
-        response = requests.get(f"{API_URL}{current_plant}", timeout=10)
+        response = session.get(f"{API_URL}{current_plant}", timeout=20)
         plant_json = response.json()
         plant_keys = plant_json.keys()
 
@@ -79,8 +79,12 @@ def fetch_all_plant_data() -> list[dict]:
     max_plants = 55
 
     with concurrent.futures.ThreadPoolExecutor() as multiprocessor:
+        session = requests.Session()
+
+        def partial_fetch_plant_data(
+            plant): return fetch_plant_data(plant, session)
         plant_data = list(multiprocessor.map(
-            fetch_plant_data, range(max_plants)))
+            partial_fetch_plant_data, range(max_plants)))
 
     return [plant for plant in plant_data if plant is not None]
 
