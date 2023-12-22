@@ -62,6 +62,9 @@ This file should contain the variables:
 `database_username`
 `database_password`
 `database_name`
+`aws_secret_access_key`
+`aws_access_key_id`
+
 
 In the `ecs-load-old-data` folder and `dashboard` folder .env file must be made. This env should have the same keys as the `pipeline` folder:
 It also should include:
