@@ -12,6 +12,7 @@ from sqlalchemy import create_engine, Connection, sql
 import streamlit as st
 
 ARCHIVE_BUCKET = "c9-ladybird-lnhm-data-bucket"
+
 ARCHIVE_KEY = 'lmnh_plant_data_archive.csv'
 
 COLOUR_LIST = ['#7db16a', '#c6d485', '#618447', '#5e949b', '#415d2e', '#d7f1ec', '#b7c62d', '#0f1511', '#3e6164', '#87c7cd', '#2d4221', '#6a6539' '#2b4242', '#48472f', '#1e2f1d']
@@ -66,14 +67,9 @@ def get_data_from_db(conn: Connection) -> pd.DataFrame:
     return recordings_df
 
 
-def get_date_from_data(data: pd.DataFrame) -> pd.DataFrame:
+def get_date_and_time_from_data(data: pd.DataFrame) -> pd.DataFrame:
     """Extracts the date from the datetime values for recordings taken."""
     data['date'] = data['Recording Taken'].dt.date
-    return data
-
-
-def separate_time_from_datetime(data: pd.DataFrame) -> pd.DataFrame:
-    """Extracts the time value from the datetime values for recordings taken."""
     data['time'] = data['Recording Taken'].dt.time
     return data
 
@@ -94,7 +90,7 @@ def temp_line_chart(data: pd.DataFrame, selected_plants: list[str]) -> st.altair
         'Temperature of soil over time', anchor='middle')
     color = alt.Color('Plant Name', scale=alt.Scale(range=COLOUR_LIST))
     figure = alt.Chart(data).mark_line().encode(
-        x='Time', y='Soil Temperature', color=color).properties(title=title)
+        x='hoursminutes(Time)', y='Soil Temperature', color=color).properties(title=title)
     return figure
 
 
@@ -106,89 +102,107 @@ def moisture_line_chart(data: pd.DataFrame, selected_plants: list[str]) -> st.al
         'Moisture Level of soil over time', anchor='middle')
     color = alt.Color('Plant Name', scale=alt.Scale(range=COLOUR_LIST))
     figure = alt.Chart(data).mark_line().encode(
-        x='Time', y='Soil Moisture', color=color).properties(title=title)
+        x='hoursminutes(Time)', y='Soil Moisture', color=color).properties(title=title)
     return figure
 
 
-if __name__ == "__main__":
+def filter_by_date(chosen_date: datetime.date, current_data: pd.DataFrame, archived_data: pd.DataFrame) -> pd.DataFrame:
+    """Filters by the chosen date, returns the relevant data to be displayed in a pandas dataframe."""
+    if chosen_date == datetime.date.today():
+        relevant_data = current_data
+    else:
+        relevant_data = archived_data[(archived_data['date'] == chosen_date)]
+    return relevant_data
 
+
+def filter_by_country(data: pd.DataFrame) -> list[str]:
+    """Retrieves the plants relevant to the selected countries and returns plant names as a list."""
+    chosen_countries = st.sidebar.multiselect("Select Country", data['Country'].unique(),
+                                default=None, placeholder="Choose an option")
+
+    country_plants = data[data['Country'].isin(chosen_countries)]['Plant Name'].unique()
+    chosen_plants = st.sidebar.multiselect("Select Plant", country_plants,
+                                           default=None, placeholder="Choose an option")
+
+    return chosen_plants
+
+
+def filter_by_botanist(data: pd.DataFrame) -> list[str]:
+    """Retrieves the plants relevant to the selected botanists and returns plant names as a list."""
+    chosen_botanists = st.sidebar.multiselect("Select Botanist", data['Botanist Name'].unique(),
+                                            default=data['Botanist Name'].unique(), placeholder="Choose an option")
+
+    botanist_plants = data[data['Botanist Name'].isin(chosen_botanists)]['Plant Name'].unique()
+    chosen_plants = st.sidebar.multiselect("Select Plant", botanist_plants,
+                                            default=None, placeholder="Choose an option")
+    
+    return chosen_plants
+
+
+def soil_monitoring_charts(data:pd.DataFrame, chosen_plants:list[str]) -> None:
+    """Plots the temperature and soil moisture charts."""
+    st.subheader('Soil Monitoring', anchor=None, divider='grey')
+    st.altair_chart(moisture_line_chart
+                    (data, chosen_plants), theme=None, use_container_width=True)
+    st.altair_chart(temp_line_chart
+                    (data, chosen_plants), theme=None, use_container_width=True)
+
+
+def last_watered_table(data:pd.DataFrame, chosen_plants:list[str]) -> None:
+    """Plots the table of last watered data against plant name."""
+    st.subheader('Last Watered Data', anchor=None, divider='grey')
+    st.dataframe(get_last_watered_plants(
+            data, chosen_plants), hide_index=True, use_container_width=True)
+
+
+if __name__ == "__main__":
 
     load_dotenv()
 
     # connecting to the database and retrieving the data:
     connection = get_db_connection(environ)
-    recording_data = get_data_from_db(connection)
-    recording_data = get_date_from_data(recording_data)
-    recording_data = separate_time_from_datetime(recording_data)
+    todays_data = get_data_from_db(connection)
+    todays_data = get_date_and_time_from_data(todays_data)
 
     # connecting to the s3 bucket and retrieving archive data file:
     s3_client = get_s3_client(environ)
-    arch_data = get_archive_data_csv(s3_client, ARCHIVE_BUCKET, ARCHIVE_KEY)
-    arch_data['Recording Taken'] = pd.to_datetime(arch_data['Recording Taken'])
-    arch_data = get_date_from_data(arch_data)
+    archive_data = get_archive_data_csv(s3_client, ARCHIVE_BUCKET, ARCHIVE_KEY)
+    archive_data['Recording Taken'] = pd.to_datetime(archive_data['Recording Taken'])
+    archive_data = get_date_and_time_from_data(archive_data)
 
-    all_dates = pd.concat([recording_data['date'], arch_data['date']]).unique()
+    all_dates = pd.concat([todays_data['date'], archive_data['date'][::-1]]).unique()
 
     # establishing streamlit dashboard title.
-    st.title('LNHM Botanical Plant Sensors')
+    st.title(':herb: LNHM Botanical Plant Sensors :herb:')
 
     # setting up a filter search on the side bar.
     st.sidebar.header('Filters:')
-    chosen_date = st.sidebar.selectbox(
+
+    #filtering by date
+    selected_date = st.sidebar.selectbox(
         "Select Date:", all_dates, index=0)
+    relevant_data = filter_by_date(selected_date, todays_data, archive_data)
 
-
-    if chosen_date == datetime.date.today():
-        relevant_data = recording_data
-    else:
-        relevant_data = arch_data[(arch_data['date'] == chosen_date)]
-
+    # option to filter by country or botanist.
     filter_choice = st.sidebar.selectbox("Filter by:", ['Botanist', 'Country'])
 
     if filter_choice == "Country":
-
-        chosen_countries = st.sidebar.multiselect("Select Country", relevant_data['Country'].unique(),
-                                            default=None, placeholder="Choose an option")
-        
-        country_plants = relevant_data[relevant_data['Country'].isin(chosen_countries)]['Plant Name'].unique()
-
-        chosen_plants = st.sidebar.multiselect("Select Plant", country_plants,
-                                           default=None, placeholder="Choose an option")
+        selected_plants = filter_by_country(relevant_data)
         
     if filter_choice == "Botanist":
+        selected_plants = filter_by_botanist(relevant_data)
+
+    # displays relevant charts depending on the date and plants selected.
+    if selected_plants and selected_date == datetime.date.today():
+        last_watered_table(relevant_data, selected_plants)
+        soil_monitoring_charts(relevant_data, selected_plants)
+
+    elif selected_plants:
+        soil_monitoring_charts(relevant_data, selected_plants)
         
-        chosen_botanists = st.sidebar.multiselect("Select Botanist", relevant_data['Botanist Name'].unique(),
-                                            default=relevant_data['Botanist Name'].unique(), placeholder="Choose an option")
-
-        botanist_plants = relevant_data[relevant_data['Botanist Name'].isin(chosen_botanists)]['Plant Name'].unique()
-
-        chosen_plants = st.sidebar.multiselect("Select Plant", botanist_plants,
-                                            default=None, placeholder="Choose an option")
-
-
-    if chosen_plants and chosen_date == datetime.date.today():
-
-        st.subheader('Last Watered Data', anchor=None, divider='grey')
-        st.dataframe(get_last_watered_plants(
-            relevant_data, chosen_plants), hide_index=True, use_container_width=True)
-    
-        st.subheader('Soil Monitoring', anchor=None, divider='grey')
-
-        st.altair_chart(moisture_line_chart
-                        (relevant_data, chosen_plants), theme=None, use_container_width=True)
-
-        st.altair_chart(temp_line_chart
-                        (relevant_data, chosen_plants), theme=None, use_container_width=True)
-
-    elif chosen_plants:
-        st.subheader('Soil Monitoring', anchor=None, divider='grey')
-
-        st.altair_chart(moisture_line_chart
-                        (relevant_data, chosen_plants), theme=None, use_container_width=True)
-
-        st.altair_chart(temp_line_chart
-                                (relevant_data, chosen_plants), theme=None, use_container_width=True)
-
+    else:
+        st.subheader('Please use the filters to display relevant data :hibiscus:',
+                     anchor=None, divider='grey', )
     
     
 

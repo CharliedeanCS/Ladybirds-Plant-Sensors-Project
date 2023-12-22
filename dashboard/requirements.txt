@@ -6,3 +6,4 @@ python-dotenv
 sqlalchemy
 pymssql
 boto3
+mypy_boto3_s3
