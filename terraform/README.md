@@ -18,4 +18,18 @@ aws_secret_access_key
 
 ## :card_index_dividers: Files Explained
 - `main.tf`
-    - A terraform script to create all resources and services needed within the project.
+    - A terraform script to create all resources and services needed within the project. These services include:
+      - `pipeline Task Definition`
+        - Task definition to run the pipeline container found in AWS ECR.
+      - `AWS pipeline ECS Service`
+         - ECS Service that constantly runs the pipeline task to keep loading data into our database.
+      - `load old data Task Definition`
+         - Task definition to run the load old data container found in AWS ECR.
+      - `EventBridge Scheduler`
+         - EventBridge Scheduler that runs every 24 hours at 9:05 extracting the previous days data and uploading it to our     long term storage.
+      - `dashboard Security Group`
+         - Security Group setup for the dashboard to allow access on port 4321.
+      - `dashboard Task Definition`
+         - Task definition to run the dashboard container found in AWS ECR.
+      - `AWS dashboard ECS Service`
+         - ECS Service that runs the dashboard task constantly and makes it publicly available on the cloud.
