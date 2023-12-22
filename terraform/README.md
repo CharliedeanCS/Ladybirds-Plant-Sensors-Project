@@ -16,6 +16,11 @@ database_name
 aws_access_key_id
 aws_secret_access_key
 
+## Running the script
+
+Run the terraform with `terraform init` and then `terraform apply`.
+Remove the terraform with `terraform destroy`
+
 ## :card_index_dividers: Files Explained
 - `main.tf`
     - A terraform script to create all resources and services needed within the project. These services include:
