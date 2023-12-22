@@ -20,60 +20,32 @@ This dashboard allows us:
 
 
 ## Repository Contents
-- dashboard
-  - dashboard.py
-- ecs-load-old-data
-  - ecs_load_to_s3.py
-- pipeline
-  - database
-    - schema.sql
-    - db_connect.sh
-    - reset_db.sh
-  - extract.py
-  - test_extract.py
-  - transform.py
-  - test_transform.py
-  - load.py
-  - test_load.py
-  - pipeline.py
- - terraform
-  - main.tf
-  - variables.tf
+- `dashboard` - contains all the code and resources required to run the dashboard
+- `diagrams` - contains all the diagrams used in planning and designing our approach
+- `pipeline` - contains all the code and resources required to run the pipeline
+  - `database` - contains the code required to set up the database, as well as script to connect to and reset the database
+- `terraform` - contains all the terraform code required to build the necessary AWS services for running the pipeline on the cloud
+- `transfer-old-data` - contains all the code and resources required to transfer data from the RDS to a CSV file in an S3 bucket
 
 
 ## Setup
 
-1. Navigate to the `pipeline` folder
-2. Create and activate a new virtual environment
-3. Run `pip3 install -r requirements.txt` to install the required libraries
-
-In the `pipeline` folder and `database` folder a .env file must be made.
-This file should contain the keys:
-`DB_HOST`
-`DB_PORT`
-`DB_USERNAME`
-`DB_PASSWORD`
-`DB_NAME`
-
-In the `terraform` folder a .tfvars file must be made.
-This file should contain the variables:
-`database_ip`
-`database_port`
-`database_username`
-`database_password`
-`database_name`
-`aws_secret_access_key`
-`aws_access_key_id`
+Follow the instructions provided in the `README.md` files located in each folder.
 
 
-In the `ecs-load-old-data` folder and `dashboard` folder .env file must be made. This env should have the same keys as the `pipeline` folder:
-It also should include:
-`AWS_ACCESS_KEY_ID`
-`AWS_SECRET_ACCESS_KEY`
+## Running the pipeline locally
 
-## Running the script
+1. To get the pipeline running, navigate to the `pipeline` folder and follow the instructions provided in the `README.md` file
+2. Once the pipeline is running, navigate to the `dashboard` folder and follow the `README.md` instructions to run the dashboard
 
-Run the pipelne with `python3 pipeline.py`; you must be in the `pipeline` folder
+## Running the pipeline on the cloud
+
+1. Create three ECR repositories, one for each of the following:
+    - `pipeline`
+    - `transfer-old-data`
+    - `dashboard`
+2. Navigate to the each of these folders, and follow the instructions provided in the `README.md` file on how to push these scripts to the cloud
+3. To create the AWS infrastructure required for the pipeline to run on the cloud, navigate to the `terraform` folder and follow the instructions provided in the `README.md` file
 
 ## Credits
 - Charlie Dean
